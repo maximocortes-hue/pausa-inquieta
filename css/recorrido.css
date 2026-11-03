@@ -1,0 +1,568 @@
+/* =========================================================
+   RECORRIDO — paso a paso
+   Aula = positivo (papel, lo físico). Unreal = negativo
+   (violeta/azul con acentos flúor, como describe el guion).
+   ========================================================= */
+
+body.rec { background: var(--ink); }
+
+/* ---------- HUD ---------- */
+.rhud__step {
+  display: flex; align-items: baseline; gap: 6px;
+  font-family: var(--f-logo); font-size: 13px;
+}
+.rhud__num { font-weight: 700; font-size: 15px; }
+.rhud__sep, .rhud__total { opacity: .6; }
+.rhud__name { margin-left: 14px; font-family: var(--f-grot); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+@media (max-width: 640px) { .rhud__name { display: none; } }
+
+.rail {
+  position: fixed; right: calc(var(--gutter) * .5); top: 50%;
+  transform: translateY(-50%);
+  z-index: 110;
+  display: grid; gap: 9px;
+  mix-blend-mode: difference;
+}
+.rail button { width: 14px; height: 14px; display: grid; place-items: center; }
+.rail button i { width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: .35; transition: transform .3s var(--ease), opacity .3s, border-radius .3s; }
+.rail button.is-done i { opacity: .7; }
+.rail button.is-on i { opacity: 1; transform: scale(2.2); border-radius: 50% 0 0 50%; }
+@media (max-width: 640px) { .rail { gap: 6px; } }
+
+/* ---------- Inicio ---------- */
+.rstart {
+  position: fixed; inset: 0; z-index: 150;
+  display: grid; place-items: center;
+  background: rgba(11,11,11,.92);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  padding: var(--gutter);
+}
+.rstart__inner { display: grid; gap: 26px; justify-items: center; }
+.rstart__title { font-family: var(--f-logo); font-size: clamp(48px, 9vw, 150px); line-height: .9; letter-spacing: -.04em; font-weight: 200; color: var(--paper); }
+.rstart__title span { color: var(--lime); font-weight: 800; }
+
+/* ---------- Escena ---------- */
+.scene { position: relative; height: calc(var(--len, 2.4) * 100vh); }
+.stage {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Aula: papel gastado. Unreal: negro con polvo y luz violeta/azul. */
+.aula .stage { background: var(--paper) url("../assets/img/paper.svg") 0 0 / 640px; color: var(--ink); }
+.unreal .stage {
+  background:
+    url("../assets/img/dust-light.svg") 0 0 / 520px,
+    radial-gradient(ellipse 70% 50% at 50% 110%, rgba(164,124,255,.42), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(31,60,255,.32), transparent 70%),
+    var(--ink);
+  color: var(--paper);
+}
+/* Bordes rasgados entre escenas (aula ↔ unreal) */
+.scene + .scene::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -1px; height: clamp(18px, 2.4vw, 36px);
+  -webkit-mask: url("../assets/img/torn-edge.svg") 0 0 / 100% 100%;
+  mask: url("../assets/img/torn-edge.svg") 0 0 / 100% 100%;
+  transform: scaleY(-1);
+  z-index: 8; pointer-events: none;
+}
+.unreal + .aula::before { background: var(--ink) url("../assets/img/dust-light.svg") 0 0 / 520px; }
+.aula + .unreal::before { background: var(--paper) url("../assets/img/paper.svg") 0 0 / 640px; }
+.unreal + .unreal::before, .aula + .aula::before { display: none; }
+
+/* Fotos del brandboard pegadas en las escenas */
+.scene-ph { position: absolute; margin: 0; z-index: 0; pointer-events: none; }
+.aula .scene-ph { opacity: .9; }
+.unreal .scene-ph { opacity: .28; }
+
+/* área principal del elemento visual */
+.door, .desk, .screen, .room, .hheart, .pcs, .lights, .hoods, .wall, .frames, .stairs, .dominos, .split, .pedestal, .bigsemi {
+  position: absolute;
+  left: 40%; right: 6%; top: 14%; bottom: 10%;
+  margin: auto;
+}
+@media (max-width: 860px) {
+  .door, .desk, .screen, .room, .hheart, .pcs, .lights, .hoods, .wall, .frames, .stairs, .dominos, .split, .pedestal, .bigsemi {
+    left: 6%; right: 6%; top: 11%; bottom: 44%;
+  }
+}
+
+/* ---------- Copy ---------- */
+.copy {
+  position: absolute;
+  left: var(--gutter); bottom: calc(var(--gutter) + 8px);
+  width: min(430px, 34vw);
+  z-index: 6;
+  display: grid; gap: 14px;
+}
+.copy p {
+  font-family: var(--f-grot);
+  font-size: clamp(16px, 1.35vw, 21px);
+  line-height: 1.3;
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(6px);
+  transition: opacity .7s var(--ease), transform .7s var(--ease), filter .7s var(--ease);
+}
+.copy p.is-in { opacity: 1; transform: none; filter: none; }
+.copy p.small { font-size: 13px; letter-spacing: .02em; opacity: 0; }
+.copy p.small.is-in { opacity: .7; }
+.kicker {
+  font-family: var(--f-grot); font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.kicker::before { content: ""; width: 26px; height: 1px; background: currentColor; }
+.unreal .kicker { color: var(--lime); }
+@media (max-width: 860px) {
+  .copy { width: auto; right: calc(var(--gutter) + 50px); bottom: calc(var(--gutter) + 4px); gap: 10px; }
+  .copy p { font-size: 15px; }
+  .unreal .copy { text-shadow: 0 0 18px var(--ink); }
+}
+
+/* Voz */
+.voice {
+  position: absolute; left: 0; right: 0; top: calc(var(--nav-h) + 1vh);
+  text-align: center;
+  font-family: var(--f-logo);
+  font-weight: 300;
+  font-size: clamp(24px, 3.4vw, 54px);
+  letter-spacing: -.03em;
+  color: var(--lime);
+  text-shadow: 0 0 30px rgba(215,255,58,.5);
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (max-width: 860px) { .voice { top: 9%; } }
+/* Voz al costado, sobre negro (para escenas donde el centro es claro) */
+.voice--side {
+  left: var(--gutter); right: auto; top: 22%;
+  width: min(430px, 34vw);
+  text-align: left;
+  font-size: clamp(26px, 3.2vw, 52px);
+  line-height: 1.02;
+}
+@media (max-width: 860px) {
+  /* en celu va arriba, sobre negro, y la sala baja un poco */
+  .voice--side { left: var(--gutter); right: calc(var(--gutter) + 20px); width: auto; top: calc(var(--nav-h) + 4px); text-align: left; font-size: 22px; }
+  .scene[data-scene="cubos"] .room { top: 17%; bottom: 40%; }
+}
+
+/* =========================================================
+   01 · LA PUERTA
+   ========================================================= */
+.door {
+  width: min(320px, 70%);
+  aspect-ratio: 1 / 2;
+  max-height: 76%;
+  background: #1a1a19;
+  border: 10px solid #2a2a28;
+  border-bottom: 0;
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,.6);
+}
+.door::after { /* línea del piso */
+  content: ""; position: absolute; left: -60%; right: -60%; bottom: 0; height: 1.5px; background: var(--ink);
+}
+.door__map {
+  position: absolute; inset: 0;
+  display: grid; justify-items: center; align-content: center; gap: 18px;
+  padding: 14px;
+  animation: projector 4s steps(1) infinite;
+}
+@keyframes projector {
+  0%, 100% { opacity: 1; } 31% { opacity: .82; } 32% { opacity: 1; } 67% { opacity: .9; } 68% { opacity: 1; }
+}
+.door__semi { width: 34%; aspect-ratio: 1 / 2; background: var(--lime); border-radius: 999px 0 0 999px; box-shadow: 0 0 30px rgba(215,255,58,.55); }
+/* Logo original (imagen). En la versión UV se tiñe con la misma forma. */
+.door__logo { display: block; width: 74%; height: auto; }
+.door__logo--uv {
+  aspect-ratio: 536 / 261;
+  background: #d9c7ff;
+  -webkit-mask: url("../assets/img/logo-white.png") center / contain no-repeat;
+  mask: url("../assets/img/logo-white.png") center / contain no-repeat;
+  filter: drop-shadow(0 0 6px #a47cff);
+}
+.door__promesa { font-family: var(--f-grot); color: var(--paper); font-size: 11px; text-align: center; max-width: 16ch; opacity: .85; }
+.door__map--uv {
+  background: #1b0f3b;
+  clip-path: circle(0 at 50% 50%);
+  pointer-events: none;
+}
+.door__map--uv .door__semi { background: #c7a8ff; box-shadow: 0 0 40px #a47cff; }
+.door__map--uv .door__promesa { color: #d9c7ff; }
+
+/* =========================================================
+   02 · TU LUGAR
+   ========================================================= */
+.desk { width: min(620px, 100%); aspect-ratio: 4 / 3; max-height: 80%; }
+.desk__lines { position: absolute; inset: -6%; width: 112%; height: 112%; overflow: visible; }
+.desk__lines path { fill: none; stroke: var(--ink); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.desk__kb {
+  position: absolute; left: 20%; top: 46%; width: 44%; height: 20%;
+  background: repeating-linear-gradient(100deg, #cfcdc5 0 12px, #c2c0b8 12px 22px);
+  border-radius: 10px;
+  filter: blur(.3px);
+}
+.desk__box {
+  position: absolute; left: 24%; top: 26%; width: 36%; height: 26%;
+  background: #111; color: #d9d8d0;
+  font-family: var(--f-grot); font-size: clamp(10px, 1.1vw, 14px);
+  padding: 4% 6%;
+  box-shadow: 0 18px 30px -10px rgba(0,0,0,.5);
+  overflow: hidden;
+}
+.desk__box i { position: absolute; right: 0; top: 50%; width: 12%; aspect-ratio: 1 / 2; transform: translateY(-50%); background: var(--lime); border-radius: 999px 0 0 999px; }
+.desk__sheet {
+  position: absolute; right: 4%; top: 30%; width: 26%; height: 44%;
+  background: #fbfaf6; box-shadow: 0 10px 24px -8px rgba(0,0,0,.25);
+  transform: rotate(4deg);
+  touch-action: none;
+}
+.desk__sheet canvas { width: 100%; height: 100%; display: block; }
+.desk__monitor {
+  position: absolute; left: 22%; top: 0; width: 40%; height: 20%;
+  background: #0d0d0d; border: 6px solid #222; border-radius: 6px;
+  overflow: hidden;
+}
+.desk__monitor i {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, var(--lime) 0 12%, transparent 13%), linear-gradient(135deg, #3b1f8f, #1f3cff);
+  transform: scaleY(0);
+}
+
+/* =========================================================
+   03 · EL INICIO
+   ========================================================= */
+.hall { position: absolute; inset: 0; z-index: -1; }
+.hall__cols { position: absolute; inset: 8% 0 22% 0; display: flex; justify-content: space-around; opacity: .55; }
+.hall__cols span {
+  width: clamp(26px, 3vw, 54px); height: 100%;
+  background: linear-gradient(90deg, #1b1430, #3a2a6e 40%, #1b1430);
+  position: relative;
+  box-shadow: 0 0 40px rgba(31,60,255,.25);
+}
+.hall__cols span::before, .hall__cols span::after { /* capiteles */
+  content: ""; position: absolute; left: -30%; right: -30%; height: 3%;
+  background: #3a2a6e;
+}
+.hall__cols span::before { top: 0; }
+.hall__cols span::after { bottom: 0; }
+.hall__rail {
+  position: absolute; left: 0; right: 0; bottom: 22%; height: 9%;
+  background:
+    radial-gradient(ellipse 40% 50% at 50% 50%, #2c2160 60%, transparent 62%) 0 0 / 30px 100%,
+    linear-gradient(#2c2160, #2c2160) 0 0 / 100% 3px no-repeat;
+  opacity: .8;
+}
+.hall__floor { position: absolute; left: 0; right: 0; bottom: 0; height: 22%; display: flex; }
+.hall__floor i { flex: 1; background: linear-gradient(#24194d, #0b0b0b); border-top: 1px solid rgba(164,124,255,.5); }
+/* El glow va en el contenedor (drop-shadow), no en el semicírculo:
+   así sigue la forma rasgada y se expande libre, sin quedar recortado en una caja. */
+.bigsemi {
+  width: clamp(90px, 12vw, 190px); height: clamp(180px, 24vw, 380px); left: 0; right: 0; top: 0; bottom: 8%; margin: auto;
+  filter: drop-shadow(0 0 22px rgba(215,255,58,.75)) drop-shadow(0 0 70px rgba(215,255,58,.45));
+}
+.bigsemi::before { /* halo amplio */
+  content: ""; position: absolute; left: -120%; right: -60%; top: -45%; bottom: -45%;
+  background: radial-gradient(ellipse at 75% 50%, rgba(215,255,58,.28), rgba(215,255,58,.08) 40%, transparent 68%);
+  pointer-events: none;
+}
+.bigsemi__core {
+  position: absolute; inset: 0;
+  background: var(--lime);
+  border-radius: 999px 0 0 999px;
+  transform-origin: 100% 50%;
+}
+@media (max-width: 860px) { .bigsemi { bottom: 30%; width: 26vw; height: 52vw; } }
+
+/* =========================================================
+   04 · EL PROYECTOR
+   ========================================================= */
+.screen {
+  width: min(640px, 100%); aspect-ratio: 16 / 10; max-height: 72%;
+  background: #fbfaf6;
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,.35);
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+.screen__beam { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% -20%, rgba(255,255,255,.9), transparent 60%); mix-blend-mode: soft-light; }
+.morph { position: relative; height: 62%; aspect-ratio: 1; }
+.morph__a, .morph__b { position: absolute; top: 0; bottom: 0; width: 50%; }
+.morph__a { left: 0; background: var(--lime); border-radius: 999px 0 0 999px; box-shadow: 0 0 30px rgba(215,255,58,.6); transform-origin: 100% 50%; }
+.morph__b { right: 0; border-radius: 0 999px 999px 0; overflow: hidden; transform-origin: 0 50%; transform: scaleX(0); }
+.morph__b canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+
+/* =========================================================
+   05 · PLANTA BAJA
+   ========================================================= */
+.room__light { position: absolute; left: 0; right: 0; height: 18%; z-index: -1; transition: background 1s; }
+.room__light--top { top: 0; background: linear-gradient(var(--room-c, #a47cff), transparent); opacity: .55; }
+.room__light--bottom { bottom: 0; background: linear-gradient(transparent, var(--room-c, #a47cff)); opacity: .55; }
+.room { display: grid; place-items: center; }
+.room__box {
+  position: relative;
+  width: min(100%, 68vh); aspect-ratio: 1;
+}
+.room__wall {
+  position: absolute; background: #f1f0ec;
+  background-image:
+    linear-gradient(90deg, rgba(0,0,0,.05) 1px, transparent 1px),
+    linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  display: grid; place-items: center;
+  transition: opacity .6s;
+}
+.room__wall--t { left: 0; right: 0; top: 0; height: 13%; }
+.room__wall--b { left: 0; right: 0; bottom: 0; height: 13%; }
+.room__wall--l { top: 13%; bottom: 13%; left: 0; width: 13%; }
+.room__wall--r { top: 13%; bottom: 13%; right: 0; width: 13%; }
+.room__wall .glow { position: absolute; width: 14px; height: 14px; border-radius: 2px; }
+.hole { width: 46px; height: 46px; background: #0b0b0b; box-shadow: inset 0 0 14px rgba(164,124,255,.8); transition: opacity .6s, transform .6s var(--ease); }
+.hole.is-gone { opacity: 0; transform: scale(.2); }
+.hole.is-hot { box-shadow: inset 0 0 18px var(--lime), 0 0 20px var(--lime); }
+.cube {
+  position: absolute; left: 50%; top: 50%;
+  width: 44px; height: 44px; margin: -22px 0 0 -22px;
+  background: linear-gradient(135deg, #f4ffc8, var(--lime) 55%, #8fb000);
+  box-shadow: 0 0 30px rgba(215,255,58,.7);
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
+}
+.cube:active { cursor: grabbing; }
+
+/* =========================================================
+   06 · EL CORAZÓN
+   ========================================================= */
+.hheart { width: min(46vh, 34vw); height: min(46vh, 34vw); left: 40%; right: 6%; top: 0; bottom: 0; }
+@media (max-width: 860px) { .hheart { left: 0; right: 0; top: 0; bottom: 36%; width: 60vw; height: 60vw; } }
+.hheart__a, .hheart__b { position: absolute; top: 0; bottom: 0; width: 50%; }
+.hheart__a { left: 0; background: var(--lime); border-radius: 999px 0 0 999px; box-shadow: 0 0 80px rgba(215,255,58,.55); transform-origin: 100% 50%; }
+.hheart__b { right: 0; border-radius: 0 999px 999px 0; overflow: hidden; opacity: 0; }
+.hheart__b canvas, .hheart__cine canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.hheart__cine { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; opacity: 0; }
+.shards { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.shards i { position: absolute; display: block; }
+.meter { position: absolute; right: calc(var(--gutter) + 26px); top: calc(var(--nav-h) + 20px); display: grid; gap: 8px; justify-items: end; z-index: 4; }
+.meter span { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+.meter i { display: block; width: 160px; height: 4px; background: rgba(255,255,255,.12); }
+.meter b { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--lime), var(--red)); transform-origin: left; transform: scaleX(0); }
+
+/* =========================================================
+   07 · LAS COMPUTADORAS
+   ========================================================= */
+.pcs { width: min(640px, 100%); aspect-ratio: 4 / 3; max-height: 80%; }
+.pc { position: absolute; width: 22%; aspect-ratio: 16 / 11; border: 2px solid var(--ink); border-radius: 6px; background: #1a1a1a; padding: 4px; }
+.pc::after { content: ""; position: absolute; left: 40%; right: 40%; bottom: -12px; height: 10px; background: var(--ink); }
+.pc i { position: absolute; inset: 4px; background: #111; overflow: hidden; display: grid; place-items: center; transition: background .2s; }
+.pc.is-on i { background: linear-gradient(135deg, #3b1f8f, #1f3cff); box-shadow: inset 0 0 20px rgba(215,255,58,.5); }
+.pc em { font-style: normal; font-family: var(--f-logo); color: var(--lime); font-size: clamp(11px, 1.4vw, 18px); opacity: 0; text-align: center; }
+.pc span { position: absolute; left: 0; right: 0; top: calc(100% + 16px); text-align: center; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+.pc--you { left: 39%; top: 64%; }
+.pc[data-pc="1"] { left: 4%; top: 40%; }
+.pc[data-pc="2"] { left: 30%; top: 22%; }
+.pc[data-pc="3"] { left: 6%; top: 4%; }
+.pc--far { left: 74%; top: 6%; width: 24%; }
+.pc--you.is-focus { outline: 3px solid var(--red); outline-offset: 6px; }
+.pcs__path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: -1; }
+.pcs__path path { fill: none; stroke: var(--blue); stroke-width: .7; stroke-linecap: round; }
+
+/* =========================================================
+   08 · LAS LUCES
+   ========================================================= */
+.lights { display: grid; grid-template-rows: 1fr auto; gap: 8%; }
+.lights__row { display: flex; justify-content: center; align-items: stretch; gap: clamp(10px, 2vw, 26px); height: 100%; }
+.lights__row i {
+  width: clamp(12px, 1.6vw, 22px);
+  border-radius: 999px;
+  background: var(--c, #333);
+  box-shadow: 0 0 24px var(--c, transparent), 0 0 60px var(--c, transparent);
+  transition: background .25s, box-shadow .25s, opacity .25s;
+}
+.lights__row i.is-off { background: #1b1b22; box-shadow: none; }
+.lights__pads { display: flex; justify-content: center; gap: clamp(12px, 3vw, 34px); flex-wrap: wrap; }
+.lights__pads button {
+  width: clamp(44px, 5vw, 64px); aspect-ratio: 1; border-radius: 50%;
+  border: 1.5px solid rgba(236,235,229,.6);
+  background: radial-gradient(circle, rgba(164,124,255,.35), transparent 70%);
+  transition: transform .2s var(--ease), background .2s;
+}
+.lights__pads button:hover { transform: scale(1.08); background: radial-gradient(circle, rgba(215,255,58,.5), transparent 70%); }
+.lights__pads button:active { transform: scale(.92); }
+
+/* =========================================================
+   09 / 12 · ENCAPUCHADOS
+   ========================================================= */
+.hoods { display: flex; justify-content: center; align-items: flex-end; gap: clamp(4px, 1vw, 14px); }
+.hood { position: relative; width: clamp(90px, 13vw, 190px); flex: none; }
+.hood svg { display: block; width: 100%; height: auto; }
+.hood svg path { fill: #111; }
+.hood b {
+  position: absolute; left: 0; right: 0; top: 52%;
+  text-align: center;
+  font-family: var(--f-logo); font-weight: 600;
+  font-size: clamp(14px, 1.9vw, 28px);
+  color: var(--paper);
+  letter-spacing: -.02em;
+}
+@media (max-width: 860px) { .hood { width: 24vw; } }
+
+/* =========================================================
+   10 · LA PARED DE LETRAS
+   ========================================================= */
+.wall { display: grid; grid-template-rows: 1fr auto; gap: 18px; width: min(560px, 100%); }
+/* El teclado es la trama de letras del brandboard: letras gruesas,
+   giradas, en los colores de la marca y con la tinta gastada. */
+.wall__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px 4px; align-content: center; }
+.wall__grid button {
+  --c: var(--paper); --r: 0deg;
+  aspect-ratio: 1;
+  display: grid; place-items: center;
+  font-family: var(--f-logo);
+  font-weight: 900;
+  font-size: clamp(26px, 3.4vw, 50px);
+  line-height: 1;
+  color: var(--c);
+  transform: rotate(var(--r));
+  -webkit-mask: url("../assets/img/grunge-mask.svg") var(--mx, 0) var(--my, 0) / 300px;
+  mask: url("../assets/img/grunge-mask.svg") var(--mx, 0) var(--my, 0) / 300px;
+  transition: color .2s, transform .25s var(--ease);
+}
+.wall__grid button:hover { transform: rotate(0deg) scale(1.18); }
+.wall__grid button.is-hit { color: var(--paper); transform: rotate(calc(var(--r) * -1)) scale(.9); }
+.wall__grid button[data-dim] { opacity: .55; }
+.wall__input {
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1.5px solid var(--paper);
+  padding: 8px 0;
+  font-family: var(--f-logo); font-size: clamp(20px, 2.4vw, 34px);
+  min-height: 1.8em;
+}
+.wall__typed { white-space: pre; }
+.wall__caret { width: 2px; height: 1em; background: var(--lime); animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.wall__go { margin-left: auto; font-size: 20px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--paper); }
+.wall__go:hover { background: var(--lime); color: var(--ink); }
+.floaters { position: absolute; inset: 0; pointer-events: none; z-index: 7; }
+.floaters span {
+  position: absolute; left: 0; top: 0;
+  font-family: var(--f-logo); font-weight: 800;
+  color: var(--lime);
+  white-space: nowrap;
+  text-shadow: 0 0 20px rgba(215,255,58,.45);
+  will-change: transform;
+}
+
+/* =========================================================
+   11 · EL PASILLO
+   ========================================================= */
+.frames { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 3vw, 46px); align-content: center; justify-items: center; }
+.frame {
+  margin: 0;
+  padding: 8px;
+  background: #f1f0ec;
+  border: 6px solid #2a1f52;
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,.7), 0 0 30px rgba(164,124,255,.25);
+  cursor: pointer;
+  transform-origin: 50% 0;
+  width: 100%;
+  max-width: 190px;
+}
+.frame .ph { width: 100%; }
+.frame::before { /* clavo */
+  content: ""; position: absolute; left: 50%; top: -18px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--paper);
+}
+.frame { position: relative; }
+
+/* =========================================================
+   13 · LA ESCALERA
+   ========================================================= */
+.stairs { overflow: hidden; }
+.stairs__track { position: absolute; inset: -20% -10%; }
+.stairs__track i {
+  position: absolute;
+  width: 34%; height: 9%;
+  background: linear-gradient(#f1f0ec, #b8b3d6);
+  box-shadow: 0 0 24px rgba(164,124,255,.45);
+}
+.stairs__track i::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 50%; background: #2a1f52; }
+.stairs__door {
+  position: absolute; right: 8%; top: 12%;
+  width: 18%; aspect-ratio: 1 / 2;
+  border: 2px solid var(--lime);
+  box-shadow: 0 0 40px rgba(215,255,58,.4), inset 0 0 40px rgba(215,255,58,.2);
+  opacity: 0;
+}
+.stairs__door i { position: absolute; right: 12%; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); }
+.stairs__noise { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; mix-blend-mode: screen; pointer-events: none; z-index: 1; }
+
+/* =========================================================
+   14 · LOS DOMINÓS
+   ========================================================= */
+.dominos { display: grid; place-items: center; }
+.dominos__row { display: flex; align-items: flex-end; gap: clamp(8px, 1.6vw, 22px); height: 40%; }
+.domino {
+  width: clamp(14px, 1.8vw, 26px); height: 100%;
+  background: #f1f0ec; border-radius: 3px;
+  box-shadow: 0 0 20px rgba(164,124,255,.4);
+  transform-origin: 100% 100%;
+  position: relative;
+}
+.domino::after { content: ""; position: absolute; left: 50%; top: 22%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--ink); box-shadow: 0 30px 0 var(--ink); }
+.domino--first { cursor: pointer; background: var(--lime); box-shadow: 0 0 30px rgba(215,255,58,.6); }
+.dominos__msg {
+  position: absolute; left: 0; right: 0; top: 18%;
+  text-align: center;
+  font-family: var(--f-logo); font-weight: 300;
+  font-size: clamp(26px, 4.4vw, 70px);
+  letter-spacing: -.03em;
+  color: var(--lime);
+  opacity: 0;
+}
+
+/* =========================================================
+   15 · EL FINAL
+   ========================================================= */
+.tunnel { position: absolute; inset: 0; z-index: 0; opacity: 0; display: grid; place-items: center; }
+.tunnel i { position: absolute; width: 20vmin; aspect-ratio: 1; border-radius: 50%; border: 1px solid rgba(164,124,255,.6); }
+.split { width: clamp(120px, 20vw, 300px); height: clamp(120px, 20vw, 300px); top: 0; bottom: 0; left: 0; right: 0; z-index: 2; }
+.split__a, .split__b { position: absolute; top: 0; bottom: 0; width: 50%; }
+.split__a { left: 0; background: var(--lime); border-radius: 999px 0 0 999px; box-shadow: 0 0 60px rgba(215,255,58,.5); }
+.split__b { right: 0; border-radius: 0 999px 999px 0; overflow: hidden; opacity: 0; }
+.split__b canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.pedestal { left: 0; right: 0; top: 0; bottom: 0; width: clamp(140px, 18vw, 240px); height: 70%; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; opacity: 0; }
+.pedestal__box { width: 100%; aspect-ratio: 3 / 1.3; background: #111; position: relative; box-shadow: 0 0 40px rgba(164,124,255,.4); margin-bottom: -1px; }
+.pedestal__box i { position: absolute; right: 0; top: 50%; height: 60%; aspect-ratio: 1 / 2; transform: translateY(-50%); background: var(--lime); border-radius: 999px 0 0 999px; }
+.pedestal__col { width: 64%; height: 42%; background: linear-gradient(90deg, #d8d6cf, #fbfaf6 45%, #c8c5bd); }
+@media (max-width: 860px) { .split, .pedestal { bottom: 36%; } }
+
+/* =========================================================
+   16 · RUIDO
+   ========================================================= */
+.aula--noise .stage { background: #111; color: var(--paper); }
+.static { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; opacity: 0; }
+.plate {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, calc(100% - 2 * var(--gutter)));
+  max-height: calc(100% - var(--nav-h) * 2);
+  overflow: auto;
+  background: rgba(11,11,11,.9);
+  border: 1px solid rgba(236,235,229,.2);
+  padding: clamp(22px, 4vw, 48px);
+  display: grid; gap: 22px;
+  opacity: 0;
+  z-index: 3;
+}
+.plate .kicker { color: var(--lime); }
+.plate__lead { font-size: clamp(15px, 1.3vw, 19px); opacity: .8; }
+.plate__quote { margin: 0; font-family: var(--f-logo); font-weight: 300; font-size: clamp(20px, 2.5vw, 36px); line-height: 1.15; letter-spacing: -.02em; }
+.plate__quote .w { opacity: .12; }
+.plate__stats { display: flex; gap: clamp(20px, 5vw, 60px); flex-wrap: wrap; }
+.plate__stats div { display: grid; gap: 2px; }
+.plate__stats b { font-family: var(--f-logo); font-size: clamp(36px, 4vw, 60px); font-weight: 800; color: var(--lime); line-height: 1; }
+.plate__stats div:last-child b { color: var(--violet); }
+.plate__stats span { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.plate__cta { display: flex; gap: 12px; flex-wrap: wrap; }

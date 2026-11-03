@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <!-- Máscara de tinta gastada: blanco = se ve, transparente = agujero.
+       Se usa como mask-image para letras y formas "impresas" con desgaste. -->
+  <filter id="g" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="3" seed="8" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -14 0 0 0 9.4"/>
+  </filter>
+  <filter id="s" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".02 .09" numOctaves="3" seed="3" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -8 0 0 0 6.1"/>
+  </filter>
+  <mask id="m">
+    <rect width="300" height="300" filter="url(#g)"/>
+  </mask>
+  <rect width="300" height="300" fill="#fff" filter="url(#s)" mask="url(#m)"/>
+</svg>

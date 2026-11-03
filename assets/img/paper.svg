@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <!-- Papel gastado para superficies claras: manchas, fibras y suciedad -->
+  <filter id="stain" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".006" numOctaves="4" seed="2" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .32  0 0 0 0 .3  0 0 0 0 .26  1.6 0 0 0 -.78"/>
+  </filter>
+  <filter id="fiber" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".5 .02" numOctaves="2" seed="5" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .1  0 0 0 0 .1  3 0 0 0 -1.85"/>
+  </filter>
+  <filter id="dirt" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="11" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .05  0 0 0 0 .05  0 0 0 0 .05  24 0 0 0 -17.9"/>
+  </filter>
+  <rect width="640" height="640" filter="url(#stain)" opacity=".24"/>
+  <rect width="640" height="640" filter="url(#fiber)" opacity=".16"/>
+  <rect width="640" height="640" filter="url(#dirt)" opacity=".45"/>
+</svg>
