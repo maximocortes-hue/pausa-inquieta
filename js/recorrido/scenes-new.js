@@ -202,10 +202,10 @@ function escalera(stage, { sound, lenis }) {
       const dy = s - prevScroll; prevScroll = s;
       cool -= dt;
       if (p > 0.06 && p < 0.8 && dy > 0) {
-        climbed += dy;
+        climbed += Math.min(dy, 120); // saltos grandes (links, rail) no cuentan como subir
         if (climbed > 260 && cool <= 0) {
           cool = 0.9;
-          const back = climbed * 0.45;
+          const back = Math.min(180, climbed * 0.45);
           climbed = 0;
           sound.glitch(0.05);
           lenis.scrollTo(s - back, { duration: 0.45, force: true, easing: (k) => 1 - Math.pow(1 - k, 3) });
