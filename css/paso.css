@@ -239,3 +239,6 @@ body.rec .pi { left: var(--gutter); top: 50%; bottom: auto; margin-top: -32px; }
   .after { top: var(--nav-h); left: 4%; bottom: 26%; grid-template-columns: 1fr; overflow: auto; }
   .after__reel { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* Frente a la puerta, el cursor es una linterna UV */
+html.uv-lens .cursor-ring { width: 120px; height: 120px; margin: -60px 0 0 -60px; border-color: #c7a8ff; box-shadow: 0 0 40px rgba(164,124,255,.6), inset 0 0 30px rgba(164,124,255,.35); mix-blend-mode: normal; }

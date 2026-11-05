@@ -94,19 +94,9 @@
     <!-- ===================== 03 — ALGO PARECE FALTAR ===================== -->
     <section class="etapa etapa--light" data-etapa="03" data-title="Algo parece faltar"><div class="etapa__stage"><span class="etapa__num">03</span><h2 class="etapa__title">Algo parece faltar</h2></div></section>
 
-    <section class="scene unreal" data-scene="cubos" data-etapa="03" data-name="Unreal · Planta baja" style="--len:2.8">
+    <section class="scene unreal scene--3d" data-scene="cubos" data-etapa="03" data-name="Unreal · Planta baja" style="--len:2.8">
       <div class="stage">
-        <div class="room">
-          <div class="room__light room__light--top"></div>
-          <div class="room__light room__light--bottom"></div>
-          <div class="room__box">
-            <div class="room__wall room__wall--t"><i class="hole" data-hole="t"></i></div>
-            <div class="room__wall room__wall--r"><i class="hole" data-hole="r"></i></div>
-            <div class="room__wall room__wall--b"><i class="hole" data-hole="b"></i></div>
-            <div class="room__wall room__wall--l"><i class="hole" data-hole="l"></i></div>
-            <div class="cube" data-cursor="mover" tabindex="0" role="button" aria-label="Cubo: arrastralo a un hueco"></div>
-          </div>
-        </div>
+        <canvas class="world" aria-label="La planta baja: paredes blancas con cubos y un cubo en el centro, en 3D"></canvas>
         <p class="voice voice--side" data-at="0.08">“Te dije que no hagas nada”</p>
         <div class="copy">
           <p>Caés en la planta baja del mismo salón. El techo y el piso emanan luces que cambian según lo que hagas.</p>
@@ -172,12 +162,9 @@
       </div>
     </section>
 
-    <section class="scene unreal" data-scene="luces" data-etapa="04" data-name="Unreal · Las luces" style="--len:2.8">
+    <section class="scene unreal scene--3d" data-scene="luces" data-etapa="04" data-name="Unreal · Las luces" style="--len:2.8">
       <div class="stage">
-        <div class="lights">
-          <div class="lights__row"></div>
-          <div class="lights__floor"><div class="lights__pads"></div></div>
-        </div>
+        <canvas class="world" aria-label="Una hilera de luces flúor y botones en el piso, en 3D"></canvas>
         <div class="copy">
           <p>En otra parte del salón vas a ver una hilera de luces en vertical, de colores flúor, que parecen seguir un patrón u orden.</p>
           <p>Alrededor hay botones en el piso. Al tocarlos, algunas luces se apagan, otras se prenden o cambian de color.</p>
@@ -185,9 +172,9 @@
       </div>
     </section>
 
-    <section class="scene aula" data-scene="hoods1" data-etapa="04" data-name="Aula · Encapuchados" style="--len:2.6">
+    <section class="scene aula scene--3d" data-scene="hoods1" data-etapa="04" data-name="Aula · Encapuchados" style="--len:2.6">
       <div class="stage">
-        <div class="hoods" data-words="¿Qué|está|faltando?"></div>
+        <canvas class="world" data-phrase="¿Qué está faltando?" aria-label="Alumnos encapuchados de espaldas frente al monitor; en cada espalda: ¿Qué está faltando?"></canvas>
         <div class="copy">
           <p>De repente aparecen los alumnos encapuchados, con los rostros tapados. Te dan la espalda frente al monitor y en sus espaldas leés una frase: “¿Qué está faltando?”</p>
           <p>Van rotando sus posiciones. Después de unos minutos se van, y después vuelven.</p>
@@ -198,12 +185,9 @@
     <!-- ===================== 05 — LO QUE SE DESORDENA ===================== -->
     <section class="etapa etapa--dark" data-etapa="05" data-title="Lo que se desordena"><div class="etapa__stage"><span class="etapa__num">05</span><h2 class="etapa__title">Lo que se desordena</h2></div></section>
 
-    <section class="scene unreal" data-scene="letras" data-etapa="05" data-name="Unreal · La pared de letras" style="--len:2.8">
+    <section class="scene unreal scene--3d" data-scene="letras" data-etapa="05" data-name="Unreal · La pared de letras" style="--len:2.8">
       <div class="stage">
-        <div class="wall">
-          <div class="wall__grid"></div>
-          <div class="wall__input"><span class="wall__typed"></span><span class="wall__caret"></span><button class="wall__go" aria-label="Soltar la palabra">↵</button></div>
-        </div>
+        <canvas class="world" data-words="HACER|PRODUCIR|OCUPAR|RENDIR" aria-label="Una pared de letras que escribe sola; las palabras salen flotando, en 3D"></canvas>
         <div class="copy">
           <p>Te cruzás con una pared de letras para escribir.</p>
           <p>Si escribís algo, las palabras se vuelven físicas y flotan por el espacio. Y te molestan.</p>
@@ -230,9 +214,9 @@
       </div>
     </section>
 
-    <section class="scene aula" data-scene="hoods2" data-etapa="05" data-name="Aula · Encapuchados" style="--len:2.6">
+    <section class="scene aula scene--3d" data-scene="hoods2" data-etapa="05" data-name="Aula · Encapuchados" style="--len:2.6">
       <div class="stage">
-        <div class="hoods" data-words="¿Qué|te dije|que hagas|antes?"></div>
+        <canvas class="world" data-phrase="¿Qué te dije que hagas antes?" aria-label="Alumnos encapuchados de espaldas; en cada espalda: ¿Qué te dije que hagas antes?"></canvas>
         <div class="copy">
           <p>Otra vez aparecen los alumnos, con los rostros tapados por capuchas y dándote la espalda. Ahora leés otra frase.</p>
           <p>Después de unos minutos, se retiran.</p>
@@ -243,12 +227,9 @@
     <!-- ===================== 06 — UN CAMINO QUE NO TERMINA ===================== -->
     <section class="etapa etapa--dark" data-etapa="06" data-title="Un camino que no termina"><div class="etapa__stage"><span class="etapa__num">06</span><h2 class="etapa__title">Un camino que no termina</h2></div></section>
 
-    <section class="scene unreal" data-scene="escalera" data-etapa="06" data-name="Unreal · La escalera" style="--len:4">
+    <section class="scene unreal scene--3d" data-scene="escalera" data-etapa="06" data-name="Unreal · La escalera" style="--len:4">
       <div class="stage">
-        <div class="stairs">
-          <div class="stairs__world"><div class="stairs__track"></div></div>
-          <div class="stairs__door"><i></i></div>
-        </div>
+        <canvas class="world" aria-label="Una escalera de neón que no termina, en 3D"></canvas>
         <canvas class="stairs__noise" width="160" height="100" aria-hidden="true"></canvas>
         <div class="copy">
           <p>Al final del pasillo, unas escaleras. Al subirlas no tienen fin: cuanto más intentes subir, más ruido.</p>
@@ -276,17 +257,9 @@
     <!-- ===================== 07 — EL CORAZÓN INQUIETO ===================== -->
     <section class="etapa etapa--dark" data-etapa="07" data-title="El corazón inquieto"><div class="etapa__stage"><span class="etapa__num">07</span><h2 class="etapa__title">El corazón inquieto</h2></div></section>
 
-    <section class="scene unreal" data-scene="final" data-etapa="07" data-name="Unreal · El final" style="--len:3.6">
+    <section class="scene unreal scene--3d" data-scene="final" data-etapa="07" data-name="Unreal · El final" style="--len:3.6">
       <div class="stage">
-        <div class="tunnel" aria-hidden="true"></div>
-        <div class="split">
-          <span class="split__a"></span>
-          <span class="split__b"><canvas width="40" height="80"></canvas></span>
-        </div>
-        <div class="pedestal" aria-hidden="true">
-          <div class="pedestal__box"><i></i></div>
-          <div class="pedestal__col"></div>
-        </div>
+        <canvas class="world" aria-label="El salón deteriorado, el semicírculo que se abre, el túnel y el pedestal con la caja, en 3D"></canvas>
         <div class="copy">
           <p>A medida que avanzás, el lugar del inicio se deteriora y pierde esa luz que guiaba. Ahora es hostil, con el ruido que vos mismo generaste.</p>
           <p>Cuando el semicírculo pasa de pausa a inquieta, se abre y te deja pasar por un túnel oscuro hasta una sala.</p>
@@ -318,7 +291,6 @@
             <div class="reel reel--dominos"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
           <div class="after__side">
-            <div class="after__stat"><b data-stat="actions">0</b><span>Cosas que hiciste</span></div>
             <div class="after__cta">
               <a href="index.html#recorrido" data-page class="pill" data-exit>Qué te llevás
                 <svg class="arr" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 6h20M15 1l5 5-5 5"/></svg>

@@ -39,8 +39,10 @@ function aula3d(stage, { sound }) {
   const w = lazy3d(canvas, () => import('../three/aula.js').then((m) => m.createAula(canvas)));
   const once = crossing();
   return {
+    leave: () => document.documentElement.classList.remove("uv-lens"),
     progress(p) {
       w.set(p);
+      document.documentElement.classList.toggle("uv-lens", p < 0.22); // el mouse es una linterna UV frente a la puerta
       once('uv', p, 0.09, () => sound.beep(660, 0.2, 0.03, 'sine'));
       once('door', p, 0.21, () => { sound.click(0.2); sound.whoosh(0.9, 0.08, true); });
       once('lines', p, 0.3, () => sound.tick(0.15));
@@ -338,14 +340,13 @@ function ruido(stage, { sound, stats, heart }) {
   const qText = quote.textContent.trim();
   const piNoise = stage.querySelector('.after__pi canvas');
   const reel = stage.querySelector('.after__reel');
-  const num = stage.querySelector('[data-stat]');
   const once = crossing();
   let active = false, sOp = 0, said = false, counted = false;
   quote.textContent = '';
   const markDone = () => { try { sessionStorage.setItem('pi-recorrido-done', '1'); } catch (e) { /* ignore */ } };
   stage.querySelectorAll('[data-exit]').forEach((a) => a.addEventListener('click', markDone));
   return {
-    enter: () => { active = true; hostile.clearWords(); hostile.enable(false); },
+    enter: () => { active = true; hostile.enable(false); },
     leave: () => { active = false; hostile.enable(true); },
     progress(p) {
       sOp = map(p, 0, 0.16);
@@ -363,9 +364,6 @@ function ruido(stage, { sound, stats, heart }) {
       if (p > 0.6 && !counted) {
         counted = true;
         markDone();
-        const s = stats();
-        const o = { v: 0 };
-        gsap.to(o, { v: s.actions, duration: 1.6, ease: 'power2.out', onUpdate: () => { num.textContent = Math.round(o.v); } });
       }
       if (p < 0.5) counted = false;
     },
@@ -378,4 +376,111 @@ function ruido(stage, { sound, stats, heart }) {
   };
 }
 
-export const NEW_SCENES = { aula3d, salon3d, pcs, letras, escalera, dominos, ruido };
+
+
+// =========================================================
+// Escenas en 3D que solo se muestran (nadie tiene que hacer nada)
+// =========================================================
+const W3D = () => import('../three/worlds.js');
+
+function cubos3d(stage, { sound, heart }) {
+  const canvas = stage.querySelector('.world');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createCubos(canvas, { onPlace: () => { sound.thud(0.3); } })));
+  let active = false, tt = 0, side = 0, placed = false;
+  return {
+    enter: () => { active = true; },
+    leave: () => { active = false; },
+    progress(p) { w.set(p); placed = p > 0.7; },
+    // el tic tac del reloj (más fuerte cuando el cubo encontró su hueco)
+    tick(dt) {
+      if (!active) return;
+      tt += dt;
+      if (tt > 1) { tt = 0; side = 1 - side; sound.tick(placed ? 0.2 : 0.08, !!side); }
+    },
+  };
+}
+
+function luces3d(stage, { sound }) {
+  const canvas = stage.querySelector('.world');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createLuces(canvas, { onPress: (i) => sound.beep(330 + i * 110, 0.12, 0.05, 'triangle') })));
+  return { progress(p) { w.set(p); } };
+}
+
+function hoods3d(stage, { sound }) {
+  const canvas = stage.querySelector('.world');
+  const phrase = canvas.dataset.phrase;
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createHoods(canvas, { phrase, onStep: () => sound.whoosh(0.5, 0.05) })));
+  const once = crossing();
+  return {
+    progress(p) {
+      w.set(p);
+      once('door', p, 0.03, () => sound.click(0.15));
+      once('out', p, 0.8, () => sound.whoosh(0.6, 0.05, false));
+    },
+  };
+}
+
+function letras3d(stage, { sound }) {
+  const canvas = stage.querySelector('.world');
+  const words = canvas.dataset.words.split('|');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createLetras(canvas, { words, onKey: () => sound.click(0.08) })));
+  return { progress(p) { w.set(p); } };
+}
+
+// La escalera: subir cuesta (si seguís bajando con el scroll, te devuelve un poco)
+function escalera3d(stage, { sound, lenis }) {
+  const canvas = stage.querySelector('.world');
+  const cv = stage.querySelector('.stairs__noise');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createEscalera(canvas)));
+  let active = false, nz = 0, last = -1, climbed = 0, prevScroll = 0, cool = 0, p = 0;
+  return {
+    enter: () => { active = true; prevScroll = lenis.scroll; hostile.grayCap(0.1); },
+    leave: () => { active = false; hostile.grayCap(1); },
+    progress(v) {
+      p = v;
+      w.set(v);
+      const climb = map(v, 0, 0.8);
+      const st = Math.floor(climb * 14);
+      if (st !== last && v < 0.8) { last = st; sound.tick(0.1 + climb * 0.2, false); if (climb > 0.3) sound.static(0.12, 0.03 + climb * 0.08); }
+      nz = v < 0.8 ? map(v, 0.1, 0.65) * 0.18 : map(v, 0.8, 0.92, 0.18, 0);
+      cv.style.opacity = nz;
+    },
+    tick(dt) {
+      if (!active) return;
+      if (nz > 0.01) noise(cv);
+      const s = lenis.scroll;
+      const dy = s - prevScroll; prevScroll = s;
+      cool -= dt;
+      if (p > 0.06 && p < 0.8 && dy > 0) {
+        climbed += Math.min(dy, 120);
+        if (climbed > 260 && cool <= 0) {
+          cool = 0.9;
+          const back = Math.min(180, climbed * 0.45);
+          climbed = 0;
+          sound.glitch(0.05);
+          lenis.scrollTo(s - back, { duration: 0.45, force: true, easing: (k) => 1 - Math.pow(1 - k, 3) });
+        }
+      } else if (dy < 0) climbed = 0;
+    },
+  };
+}
+
+function final3d(stage, { sound }) {
+  const canvas = stage.querySelector('.world');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createFinal(canvas)));
+  const once = crossing();
+  return {
+    progress(p) {
+      w.set(p);
+      once('inq', p, 0.06, () => sound.static(1, 0.08));
+      once('open', p, 0.32, () => sound.whoosh(1.2, 0.12, true));
+      once('ped', p, 0.74, () => sound.chime(262, 0.06));
+    },
+  };
+}
+
+export const NEW_SCENES = {
+  aula3d, salon3d, pcs, dominos, ruido,
+  cubos: cubos3d, luces: luces3d, hoods1: hoods3d, hoods2: hoods3d,
+  letras: letras3d, escalera: escalera3d, final: final3d,
+};

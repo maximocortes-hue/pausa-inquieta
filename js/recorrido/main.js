@@ -29,16 +29,7 @@ tv.in();
 const scenesEl = document.querySelector('.scenes');
 hostile.init({ scenes: scenesEl });
 
-// Las luces: tocar los botones te nubla la vista; soltarlos la aclara
-function luces(stage, ctx) {
-  const api = OLD.luces(stage, ctx);
-  stage.querySelectorAll('.lights__pads button').forEach((b) => {
-    b.addEventListener('pointerdown', () => hostile.press(true));
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => b.addEventListener(ev, () => hostile.press(false)));
-  });
-  return api;
-}
-const SCENES = { ...OLD, ...NEW_SCENES, luces };
+const SCENES = { ...OLD, ...NEW_SCENES };
 
 const ctx = { lenis, heart, activity, sound, tv, stats: () => ({ actions: activity.actions }) };
 
@@ -108,7 +99,7 @@ etapas.forEach((sec, i) => {
         const kk = clamp(inn * 1.4 - (k / chars.length) * 0.4);
         // las letras buscan su peso (thin → black) hasta asentarse
         c.style.fontWeight = kk < 1 && kk > 0 && Math.random() < 0.5 ? pick(WEIGHTS) : bases[k];
-        const glitch = P > 0.3 && Math.random() < P * 0.04 ? (Math.random() - 0.5) * P * 40 : 0;
+        const glitch = 0;
         c.style.transform = `translate(${glitch}px, ${(1 - kk) * 60 - out * 40}px)`;
         c.style.opacity = (kk * (1 - out)).toFixed(3);
       });
@@ -121,16 +112,6 @@ etapas.forEach((sec, i) => {
 // clic en el texto: lo completa (no hace falta esperar)
 narrEl.addEventListener('click', () => { textEl.querySelectorAll('.pi-ch').forEach((s) => { s.textContent = s.dataset.ch; s.classList.add('is-in', 'is-clear'); }); });
 
-// partes que faltan: con más hostilidad, letras del relato desaparecen un rato
-gsap.ticker.add(() => {
-  const P = hostile.P;
-  if (P < 0.45 || Math.random() > P * 0.05) return;
-  const chs = textEl.querySelectorAll('.pi-ch.is-clear');
-  if (!chs.length) return;
-  const c = chs[Math.floor(Math.random() * chs.length)];
-  c.style.visibility = 'hidden';
-  setTimeout(() => { c.style.visibility = ""; }, 300 + Math.random() * 700);
-});
 
 // ---------- Escenas
 const scenes = [...document.querySelectorAll('.scene')];

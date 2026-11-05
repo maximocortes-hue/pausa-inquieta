@@ -369,6 +369,43 @@ export const sound = {
     o.start(t); lfo.start(t); o.stop(t + 0.6); lfo.stop(t + 0.6);
   },
 
+  // Ambiente hostil continuo: un zumbido grave, un ruido sucio y un pitido agudo
+  // que suben con el nivel (0..1). Devuelve { set(level), stop() }.
+  ambience() {
+    if (!ensure()) return { set() {}, stop() {} };
+    const t = ctx.currentTime;
+    const out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    // zumbido
+    const drone = ctx.createGain(); drone.gain.value = 0;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 260;
+    const o1 = ctx.createOscillator(); o1.type = 'sawtooth'; o1.frequency.value = 49;
+    const o2 = ctx.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = 49.6;
+    o1.connect(lp); o2.connect(lp); lp.connect(drone).connect(out);
+    // ruido sucio (como una tele mal sintonizada)
+    const nz = noiseSrc(); const nf = ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 1800; nf.Q.value = 0.6;
+    const ng = ctx.createGain(); ng.gain.value = 0;
+    nz.connect(nf).connect(ng).connect(out);
+    // pitido agudo
+    const wh = ctx.createOscillator(); wh.type = 'sine'; wh.frequency.value = 8200;
+    const wg = ctx.createGain(); wg.gain.value = 0;
+    wh.connect(wg).connect(out);
+    [o1, o2, nz, wh].forEach((s) => s.start(t));
+    return {
+      set(L) {
+        if (!ctx) return;
+        const n = ctx.currentTime;
+        const on = enabled ? 1 : 0;
+        out.gain.setTargetAtTime(on * 0.9, n, 0.3);
+        drone.gain.setTargetAtTime(Math.min(0.12, L * 0.13), n, 0.6);
+        lp.frequency.setTargetAtTime(160 + L * 700, n, 0.6);
+        ng.gain.setTargetAtTime(Math.max(0, L - 0.25) * 0.05, n, 0.5);
+        wg.gain.setTargetAtTime(Math.max(0, L - 0.55) * 0.012, n, 0.8);
+        o2.frequency.setTargetAtTime(49.6 + L * 3, n, 1);
+      },
+      stop() { const n = ctx.currentTime; out.gain.setTargetAtTime(0, n, 0.3); },
+    };
+  },
+
   // Tono suave (cuando algo “se acomoda”)
   chime(freq = 660, vol = 0.06) {
     if (!ok()) return;

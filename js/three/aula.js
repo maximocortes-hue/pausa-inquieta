@@ -195,10 +195,42 @@ export async function createAula(canvas) {
   const mapTex = toTex(doorCanvas(logo, false));
   const uvTex = toTex(doorCanvas(logo, true));
   const doorFront = new THREE.MeshBasicMaterial({ map: mapTex });
-  const doorUV = new THREE.MeshBasicMaterial({ map: uvTex, transparent: true, opacity: 0 });
+  // Linterna UV: el mapping violeta se ve solo dentro de un círculo que sigue al mouse
+  const uvSrc = doorCanvas(logo, true);
+  const lensC = document.createElement("canvas"); lensC.width = uvSrc.width; lensC.height = uvSrc.height;
+  const lensX = lensC.getContext("2d");
+  const lensTex = toTex(lensC);
+  void uvTex;
+  const doorUV = new THREE.MeshBasicMaterial({ map: lensTex, transparent: true, opacity: 1, depthWrite: false });
   const doorBack = new THREE.MeshStandardMaterial({ color: 0x1e1e1c, roughness: 0.6 });
   const door = add(new THREE.BoxGeometry(DW - 0.08, DH - 0.04, 0.05), [doorBack, doorBack, doorBack, doorBack, doorFront, doorBack], (DW - 0.08) / 2, (DH - 0.04) / 2, 0, doorPivot);
   const doorUVPlane = add(new THREE.PlaneGeometry(DW - 0.08, DH - 0.04), doorUV, (DW - 0.08) / 2, (DH - 0.04) / 2, 0.03, doorPivot);
+  const ray = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const lens = { u: -1, v: -1, last: -10, r: 0 };
+  function drawLens() {
+    lensX.clearRect(0, 0, lensC.width, lensC.height);
+    if (lens.r < 1) { lensTex.needsUpdate = true; return; }
+    const x = lens.u * lensC.width, y = (1 - lens.v) * lensC.height;
+    lensX.save();
+    lensX.drawImage(uvSrc, 0, 0);
+    lensX.globalCompositeOperation = "destination-in";
+    const g = lensX.createRadialGradient(x, y, lens.r * 0.6, x, y, lens.r);
+    g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    lensX.fillStyle = g; lensX.fillRect(0, 0, lensC.width, lensC.height);
+    lensX.restore();
+    // borde de la linterna
+    lensX.strokeStyle = "rgba(199,168,255,.55)"; lensX.lineWidth = 3;
+    lensX.beginPath(); lensX.arc(x, y, lens.r * 0.92, 0, Math.PI * 2); lensX.stroke();
+    lensTex.needsUpdate = true;
+  }
+  canvas.addEventListener("pointermove", (e) => {
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObject(doorUVPlane)[0];
+    if (hit && hit.uv) { lens.u = hit.uv.x; lens.v = hit.uv.y; lens.last = performance.now(); }
+  });
   // semicírculo del mapping proyectado sobre la pared, arriba de la puerta
   const semiMat = new THREE.MeshBasicMaterial({ color: LIME, transparent: true, opacity: 0.95 });
   const wallSemi = add(new THREE.CircleGeometry(0.42, 48, Math.PI / 2, Math.PI), semiMat, 0.12, DH + 0.5, D0 + 0.1);
@@ -336,10 +368,11 @@ export async function createAula(canvas) {
     camera.lookAt(camAt.x + look.x * 0.35 * (1 - seg(p, 0.8, 0.95)), camAt.y - look.y * 0.2 * (1 - seg(p, 0.8, 0.95)), camAt.z);
 
     // Lentes UV: el mismo mapping, en violeta (no revela nada nuevo)
-    const uv = seg(p, 0.08, 0.12) * (1 - seg(p, 0.18, 0.22));
-    doorUV.opacity = uv;
-    semiMat.color.set(uv > 0.5 ? 0xc7a8ff : LIME);
-    semiGlow.material.color.set(uv > 0.5 ? VIOLET : LIME);
+    // La linterna solo funciona frente a la puerta, mientras el mouse está encima
+    const lensOn = p < 0.24 && performance.now() - lens.last < 900;
+    const rT = lensOn ? 120 : 0;
+    if (Math.abs(lens.r - rT) > 0.5 || lensOn) { lens.r += (rT - lens.r) * 0.25; drawLens(); }
+    const uv = 0;
     // el semicírculo late, leve
     const beat = 1 + Math.max(0, Math.sin(time * 5.2)) * 0.04;
     wallSemi.scale.setScalar(beat); semiGlow.scale.setScalar(beat * (1 + uv * 0.2));

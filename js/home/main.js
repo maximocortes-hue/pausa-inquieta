@@ -28,7 +28,7 @@ const done = store.get('pi-recorrido-done') === '1';
 const fromRecorrido = location.hash === '#recorrido' || location.hash === '#iniciar';
 const root = document.documentElement;
 // Si ya hiciste el recorrido, lo de abajo está abierto (al volver, se abre con animación)
-if (done) root.classList.add('unlocked');
+if (done && !fromRecorrido) root.classList.add('unlocked');
 if (done && fromRecorrido) root.classList.add('unlocking');
 
 const lenis = initScroll();
@@ -168,7 +168,7 @@ function unlock() {
     },
   });
   tl.to({}, { duration: 0.6 })
-    .add(() => { lock.classList.add('is-open'); sound.unlock(); })
+    .add(() => { lock.classList.add('is-open'); sound.unlock(); root.classList.add('unlocked'); ScrollTrigger.refresh(); })
     .to(lock, { y: -10, duration: 0.25, yoyo: true, repeat: 1, ease: 'power2.out' }, '+=0.05')
     .to(lockwall, { opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0, duration: 0.8, ease: 'power3.inOut' }, '+=0.5');
 }

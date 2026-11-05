@@ -648,8 +648,19 @@
 /* =========================================================
    CANDADO — no se pasa hasta hacer el recorrido
    ========================================================= */
-.after { display: none; }
-html.unlocked .after { display: block; }
+/* Mientras está bloqueado, lo que sigue se ve abajo, apagado: se entiende que hay más
+   página, pero no se puede llegar (la página termina ahí). */
+.after { position: relative; }
+html:not(.unlocked) .after {
+  height: 78vh; overflow: hidden;
+  opacity: .32; filter: grayscale(.5) blur(1.5px);
+  pointer-events: none; user-select: none;
+  -webkit-mask-image: linear-gradient(#000 20%, transparent 95%);
+  mask-image: linear-gradient(#000 20%, transparent 95%);
+}
+html.unlocked .after { transition: opacity .8s, filter .8s; }
+/* lo primero de "qué te llevás" es casi todo negro: mientras está bloqueado asoma el mensaje */
+html:not(.unlocked) .after .llevas { display: none; }
 .lockwall {
   position: relative; z-index: 3;
   display: grid; place-items: center; gap: 14px;
@@ -664,22 +675,19 @@ html.unlocked:not(.unlocking) .lockwall { display: none; }
 .lock:hover .lock__shackle { transform: translateY(-3px); }
 .lock.is-open .lock__shackle { transform: translateY(-16px) rotate(-28deg); }
 
-/* =========================================================
-   REDES — la trama de círculos dibujada + el chico sobre la ciudad
-   ========================================================= */
-.redes__band {
-  position: absolute; left: -2vw; right: -2vw; top: 30vh; height: 34vh;
-  background: var(--ink); z-index: 1; overflow: hidden;
-}
-.redes__circles { position: absolute; inset: 0; width: 100%; height: 100%; }
-.redes__circles circle { transform-box: fill-box; transform-origin: center; }
-.redes__art { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-.redes__city { right: -3vw; top: 12vh; width: 50vw; z-index: 0; }
-.redes__boy { right: 9vw; top: calc(30vh - 29vh); height: 31vh; z-index: 2; position: absolute; }
-.redes__art { z-index: auto; }
-.redes__boy { z-index: 2; }
+
+/* Logo original (imagen) en el hero */
+.logo__img { display: block; width: clamp(240px, 46vw, 760px); height: auto; user-select: none; }
+@media (max-width: 760px) { .logo__img { width: 84vw; } }
+
+/* REDES — afiche pegado con cinta y la tira de la trama */
+.redes__poster { right: 6vw; top: 9vh; height: 74vh; transform: rotate(2.4deg); z-index: 1; }
+.redes__tape1 { right: 14vw; top: 7vh; transform: rotate(-7deg); }
+.redes__tape2 { right: 4vw; top: 78vh; transform: rotate(-38deg); }
+.redes__strip { left: -2vw; top: 20vh; width: 46vw; transform: rotate(-2deg); z-index: 0; }
 @media (max-width: 860px) {
-  .redes__band { top: 26vh; height: 26vh; }
-  .redes__city { width: 110vw; right: -30vw; top: 12vh; }
-  .redes__boy { height: 18vh; top: calc(26vh - 17vh); right: 4vw; }
+  .redes__poster { right: -10vw; top: 12vh; height: 52vh; }
+  .redes__tape1 { right: 20vw; top: 10vh; }
+  .redes__tape2 { display: none; }
+  .redes__strip { width: 80vw; top: auto; bottom: 30vh; }
 }
