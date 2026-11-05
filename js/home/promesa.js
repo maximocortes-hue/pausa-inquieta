@@ -31,8 +31,7 @@ export default function promesa(lenis) {
   });
 
   sec.querySelectorAll('.ph').forEach((p) => torn(p, { amp: 2.4 }));
-  gsap.to('.promesa__ph', { yPercent: -10, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
-  gsap.to('.promesa__ph2', { yPercent: 12, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
+  gsap.to('.promesa__city', { yPercent: -10, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
 
   gsap.from(sec.querySelector('.promesa__label'), {
     opacity: 0, x: -30, duration: 0.8, ease: 'power3.out',

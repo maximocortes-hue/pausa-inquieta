@@ -22,8 +22,8 @@ export default function story() {
     });
   });
 
-  gsap.to('.story__ph1', { yPercent: -40, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
-  gsap.to('.story__ph2', { yPercent: 20, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
+  gsap.to('.story__girl', { yPercent: -12, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
+  gsap.to('.story__city', { yPercent: 8, ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
   const px = pixels(sec.querySelector('.story__tramas'), { n: 10, colors: ['#1f3cff', '#a47cff', '#d7ff3a', '#ecebe5'], area: [66, 10, 98, 90] });
   gsap.to(px, { opacity: () => Math.random(), duration: 0.12, repeat: -1, repeatRefresh: true, repeatDelay: 1.4, ease: 'steps(1)', stagger: { each: 0.4, from: 'random' } });
   gsap.from(sec.querySelector('.story__head'), { opacity: 0, x: -30, duration: 0.8, scrollTrigger: { trigger: sec, start: 'top 60%' } });

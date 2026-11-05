@@ -245,6 +245,130 @@ export const sound = {
     o2.start(t + 0.6); o2.stop(t + 3.4);
   },
 
+  // Voz de PI: un "bip" corto por letra, con un poco de ruido y altura que varía
+  // (al estilo de los diálogos de los videojuegos, sin palabras).
+  // rough: 0 = PI (Pausa), 1 = su lado Ruido (más grave, áspero).
+  voice(rough = 0, vol = 0.05) {
+    if (!ok()) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    const f = ctx.createBiquadFilter();
+    o.type = rough > 0.5 ? 'sawtooth' : 'square';
+    const base = rough > 0.5 ? 120 : 290;
+    o.frequency.setValueAtTime(base * (0.9 + Math.random() * 0.25), t);
+    o.frequency.exponentialRampToValueAtTime(base * (0.8 + Math.random() * 0.15), t + 0.05);
+    f.type = 'lowpass'; f.frequency.value = rough > 0.5 ? 900 : 2200;
+    env(g, t, 0.003, vol, 0.045);
+    o.connect(f).connect(g).connect(master);
+    o.start(t); o.stop(t + 0.07);
+    // un poco de soplido de ruido encima
+    const s = noiseSrc();
+    const nf = ctx.createBiquadFilter();
+    nf.type = 'bandpass'; nf.frequency.value = rough > 0.5 ? 700 : 2600; nf.Q.value = 2;
+    const ng = ctx.createGain();
+    env(ng, t, 0.002, vol * (0.25 + rough * 0.8), 0.04);
+    s.connect(nf).connect(ng).connect(master);
+    s.start(t); s.stop(t + 0.06);
+  },
+
+  // Tensión: un zumbido grave que crece y late. Devuelve una función para cortarlo.
+  tension(vol = 0.09) {
+    if (!ok()) return () => {};
+    const t = ctx.currentTime;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 1.6);
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(180, t); lp.frequency.exponentialRampToValueAtTime(700, t + 3);
+    const oscs = [55, 55.7, 82.4].map((fr, i) => {
+      const o = ctx.createOscillator();
+      o.type = i === 2 ? 'triangle' : 'sawtooth';
+      o.frequency.value = fr;
+      o.connect(lp);
+      o.start(t);
+      return o;
+    });
+    // trémolo que se acelera
+    const trem = ctx.createGain(); trem.gain.value = 0.7;
+    const lfo = ctx.createOscillator(); const lg = ctx.createGain();
+    lfo.frequency.setValueAtTime(2, t); lfo.frequency.linearRampToValueAtTime(7, t + 4);
+    lg.gain.value = 0.3; lfo.connect(lg).connect(trem.gain); lfo.start(t);
+    lp.connect(trem).connect(g).connect(master);
+    return (fade = 0.4) => {
+      const n = ctx.currentTime;
+      g.gain.cancelScheduledValues(n);
+      g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), n);
+      g.gain.exponentialRampToValueAtTime(0.0001, n + fade);
+      [...oscs, lfo].forEach((o) => o.stop(n + fade + 0.05));
+    };
+  },
+
+  // Bloqueado: dos golpes secos y graves, como un "no"
+  locked(vol = 0.16) {
+    if (!ok()) return;
+    const t = ctx.currentTime;
+    [0, 0.11].forEach((off) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(140, t + off);
+      o.frequency.exponentialRampToValueAtTime(90, t + off + 0.08);
+      const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 800;
+      env(g, t + off, 0.004, vol, 0.08);
+      o.connect(f).connect(g).connect(master);
+      o.start(t + off); o.stop(t + off + 0.12);
+    });
+    this.click(0.12);
+  },
+
+  // Desbloqueo: clack metálico + campanita
+  unlock(vol = 0.12) {
+    if (!ok()) return;
+    const t = ctx.currentTime;
+    const s = noiseSrc();
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 3400; f.Q.value = 3;
+    const g = ctx.createGain(); env(g, t, 0.001, vol * 1.4, 0.06);
+    s.connect(f).connect(g).connect(master); s.start(t); s.stop(t + 0.08);
+    const o = ctx.createOscillator(); const og = ctx.createGain();
+    o.type = 'triangle'; o.frequency.setValueAtTime(1900, t); o.frequency.exponentialRampToValueAtTime(1500, t + 0.1);
+    env(og, t, 0.002, vol * 0.5, 0.15); o.connect(og).connect(master); o.start(t); o.stop(t + 0.2);
+    setTimeout(() => this.chime(523, 0.05), 180);
+  },
+
+  // Sonido feo (PI enojado / el Ruido): un chirrido roto
+  glitch(vol = 0.07) {
+    if (!ok()) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'sawtooth';
+    const f0 = 90 + Math.random() * 400;
+    o.frequency.setValueAtTime(f0, t);
+    for (let i = 1; i < 6; i++) o.frequency.setValueAtTime(f0 * (0.5 + Math.random() * 2.5), t + i * 0.025);
+    const ws = ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) { const x = i / 128 - 1; curve[i] = Math.sign(x) * Math.min(1, Math.abs(x) * 6); }
+    ws.curve = curve;
+    env(g, t, 0.002, vol, 0.16);
+    o.connect(ws).connect(g).connect(master);
+    o.start(t); o.stop(t + 0.2);
+    this.static(0.12, vol * 0.8);
+  },
+
+  // Gruñido de PI: grave, áspero, corto
+  grumble(vol = 0.1) {
+    if (!ok()) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    const lfo = ctx.createOscillator(); const lg = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(70, t); o.frequency.linearRampToValueAtTime(52, t + 0.5);
+    lfo.frequency.value = 23; lg.gain.value = 20; lfo.connect(lg).connect(o.frequency);
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 500;
+    env(g, t, 0.03, vol, 0.5);
+    o.connect(f).connect(g).connect(master);
+    o.start(t); lfo.start(t); o.stop(t + 0.6); lfo.stop(t + 0.6);
+  },
+
   // Tono suave (cuando algo “se acomoda”)
   chime(freq = 660, vol = 0.06) {
     if (!ok()) return;

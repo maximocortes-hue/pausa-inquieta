@@ -30,30 +30,13 @@
     </div>
   </div>
 
-  <!-- Nav -->
+  <!-- Arriba: solo el logo y el sonido -->
   <header class="nav">
-    <a href="#hero" class="nav__mark" aria-label="Volver al inicio"><span class="mark"></span><img class="nav__logo" src="assets/img/logo-white.png" alt="Pausa Inquieta" width="536" height="261"></a>
-    <nav class="nav__links" aria-label="Secciones">
-      <a href="#somos">Quiénes somos</a>
-      <a href="#caja">La caja</a>
-      <a href="#recorrido">Recorrido</a>
-      <a href="#llevas">Qué te llevás</a>
-      <a href="#redes">Redes</a>
-    </nav>
+    <a href="#hero" class="nav__mark" aria-label="Volver al inicio"><img class="nav__logo" src="assets/img/logo-white.png" alt="Pausa Inquieta" width="536" height="261"></a>
     <div class="nav__right">
       <button class="nav__btn" data-sound-toggle aria-label="Sonido"><span class="dot"></span>Sonido <span class="state">Off</span></button>
-      <button class="nav__btn nav__menu" aria-label="Menú"><span class="state">Menú</span></button>
     </div>
   </header>
-  <nav class="menu" aria-label="Menú">
-    <a href="#somos">Quiénes somos</a>
-    <a href="#promesa">La promesa</a>
-    <a href="#caja">La caja</a>
-    <a href="#controles">Controles</a>
-    <a href="#recorrido">Recorrido</a>
-    <a href="#llevas">Qué te llevás</a>
-    <a href="#redes">Redes</a>
-  </nav>
 
   <main>
 
@@ -68,8 +51,10 @@
         <div class="t-bar hero__b3"></div>
         <svg class="ast hero__ast" viewBox="-50 -50 100 100"><g><line x1="0" y1="-46" x2="0" y2="46"/><line x1="-40" y1="-23" x2="40" y2="23"/><line x1="-40" y1="23" x2="40" y2="-23"/></g></svg>
       </div>
-      <figure class="ph hero__ph hero__ph2" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1417,731,289,343" aria-hidden="true"></figure>
-      <figure class="ph hero__ph hero__ph3" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1716,819,191,189" aria-hidden="true"></figure>
+
+      <!-- La ciudad del brandboard (sin cielo) y una persona recortada encima -->
+      <div class="city hero__city" aria-hidden="true"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
+      <img class="cut hero__boy" src="assets/cut/boy-banner.png" alt="" width="320" height="314" aria-hidden="true">
 
       <div class="hero__sun" aria-hidden="true"><span class="hero__sun-core"></span></div>
 
@@ -92,12 +77,14 @@
         <div class="somos__collage" aria-hidden="true">
           <div class="t-circle somos__c1"></div>
           <div class="t-semi somos__semi"></div>
-          <figure class="ph somos__ph1" data-src="assets/img/brand-b.webp" data-size="2000,1417" data-crop="150,280,520,820"></figure>
-          <figure class="ph somos__ph2" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1210,672,210,330"></figure>
-          <span class="tape somos__tape1"></span>
-          <span class="tape somos__tape2"></span>
           <div class="t-circle somos__dot"></div>
           <div class="t-bar somos__bar"></div>
+          <div class="city somos__city"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
+          <!-- La chica, recortada. El pie sale de la sección y se mueve apenas -->
+          <div class="somos__girl">
+            <img class="somos__girl-body" src="assets/cut/girl-poster.png" alt="" width="520" height="760">
+            <img class="somos__girl-foot" src="assets/cut/girl-poster.png" alt="" width="520" height="760">
+          </div>
         </div>
 
         <header class="somos__head">
@@ -115,35 +102,14 @@
       </div>
     </section>
 
-    <!-- ============ PROMESA ============ -->
+    <!-- ============ PROMESA (acá se presenta PI) ============ -->
     <section class="promesa neg rip-paper" id="promesa">
       <div class="promesa__stick">
-        <figure class="ph promesa__ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="300,690,400,384" aria-hidden="true"></figure>
-        <figure class="ph promesa__ph2" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1210,672,210,402" aria-hidden="true"></figure>
+        <div class="city promesa__city" aria-hidden="true"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
         <span class="label label--lime promesa__label">/02 — La promesa</span>
         <div class="promesa__halo" aria-hidden="true"></div>
         <p class="promesa__text">Entrá, por una vez, no hay nada que cumplir.</p>
         <p class="promesa__hint" aria-hidden="true">No hagas nada</p>
-      </div>
-    </section>
-
-    <!-- ============ LA CAJA ============ -->
-    <section class="caja neg" id="caja">
-      <div class="caja__stick">
-        <figure class="ph caja__ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1200,672,220,402" aria-hidden="true"></figure>
-        <p class="caja__word" aria-hidden="true">LA CAJA</p>
-        <div class="caja__glow" aria-hidden="true"></div>
-        <div class="caja__tramas" aria-hidden="true">
-          <div class="t-circle caja__c1"></div>
-          <div class="t-bar caja__b1"></div>
-          <div class="t-bar caja__b2"></div>
-        </div>
-        <canvas class="caja__canvas" data-cursor="girar" aria-label="Caja de Pausa Inquieta en 3D"></canvas>
-        <header class="caja__head"><span class="label label--lime">/03 — La caja</span></header>
-        <div class="caja__caps">
-          <p class="cap" data-at="0.04,1.01">La caja, una tarjeta, ¿Y qué vas a hacer?</p>
-        </div>
-        <div class="bar-progress" aria-hidden="true"><i></i></div>
       </div>
     </section>
 
@@ -155,7 +121,7 @@
         <div class="t-bar ctrl__b1"></div>
       </div>
       <header class="ctrl__head">
-        <span class="label">/04 — Controles</span>
+        <span class="label">/03 — Controles</span>
         <h2 class="ctrl__title" aria-label="Controles">Controles</h2>
       </header>
 
@@ -181,7 +147,7 @@
         </div>
 
         <div class="arena" aria-hidden="true">
-          <figure class="ph arena__ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="950,672,536,402" data-no-ratio="1"></figure>
+          <div class="city arena__city"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
           <div class="arena__floor"></div>
           <div class="arena__shadow"></div>
           <div class="arena__player"><i></i></div>
@@ -190,16 +156,18 @@
       </div>
     </section>
 
-    <!-- ============ RECORRIDO (intro) ============ -->
+    <!-- ============ RECORRIDO (intro) + candado ============ -->
     <section class="story neg rip-paper" id="recorrido">
       <div class="story__light" aria-hidden="true"></div>
-      <figure class="ph story__ph1" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1680,680,190,170" aria-hidden="true"></figure>
-      <figure class="ph story__ph2" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="300,690,400,384" aria-hidden="true"></figure>
+      <div class="story__art" aria-hidden="true">
+        <div class="city story__city"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
+        <img class="cut story__girl" src="assets/cut/girl-banner.png" alt="" width="400" height="384">
+      </div>
       <div class="story__tramas" aria-hidden="true">
         <div class="t-circle story__c1"></div>
         <div class="t-bar story__b1"></div>
       </div>
-      <header class="story__head"><span class="label label--lime">/05 — El recorrido</span></header>
+      <header class="story__head"><span class="label label--lime">/04 — El recorrido</span></header>
       <div class="story__text">
         <p class="st">Al entrar vas a encontrar caminos con finales diferentes</p>
         <p class="st">dependiendo de lo que decidas hacer,</p>
@@ -207,82 +175,97 @@
         <p class="st st--key">solo estando, todo sucede.</p>
         <p class="st st--end">Descubrís que no siempre hay que hacer o rendir para que algo valga la pena.</p>
       </div>
-      <div class="story__cta">
+      <div class="story__cta" id="iniciar">
         <a href="recorrido.html" data-page class="start" data-cursor="entrar">
           <span class="start__half start__half--a"></span>
           <span class="start__half start__half--b"></span>
           <span class="start__txt">Iniciar</span>
         </a>
       </div>
+
+      <!-- Hasta que no hagas el recorrido, de acá no se pasa -->
+      <div class="lockwall" id="lock">
+        <button class="lock" aria-label="Bloqueado: primero hacé el recorrido" data-cursor="bloqueado">
+          <svg viewBox="0 0 80 100" aria-hidden="true">
+            <path class="lock__shackle" d="M20 46 V30 a20 20 0 0 1 40 0 V46" />
+            <rect class="lock__body" x="8" y="44" width="64" height="50" rx="4" />
+            <path class="lock__semi" d="M40 58 a11 11 0 0 0 0 22 Z" />
+          </svg>
+        </button>
+      </div>
     </section>
 
-    <!-- ============ QUÉ TE LLEVÁS ============ -->
-    <section class="llevas" id="llevas">
-      <div class="llevas__stick">
-        <div class="llevas__tramas" aria-hidden="true">
-          <figure class="ph llevas__ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1417,731,289,343"></figure>
-          <div class="t-semi llevas__semi"></div>
-          <div class="t-circle llevas__c1"></div>
-          <div class="t-bar llevas__b1"></div>
-          <div class="t-bar llevas__b2"></div>
+    <!-- ============ DESPUÉS DEL RECORRIDO (se desbloquea) ============ -->
+    <div class="after" id="after">
+
+      <!-- QUÉ TE LLEVÁS: el doble fondo -->
+      <section class="llevas" id="llevas">
+        <div class="llevas__stick">
+          <div class="llevas__tramas" aria-hidden="true">
+            <div class="city llevas__city"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
+            <div class="t-semi llevas__semi"></div>
+            <div class="t-circle llevas__c1"></div>
+            <div class="t-bar llevas__b1"></div>
+            <div class="t-bar llevas__b2"></div>
+          </div>
+          <canvas class="llevas__canvas" aria-label="La caja y su doble fondo, en 3D"></canvas>
+          <header class="llevas__head"><span class="label">/05 — Qué te llevás</span></header>
+          <div class="llevas__caps">
+            <p class="cap" data-at="0.06,0.4">La caja tenía un doble fondo.</p>
+            <p class="cap" data-at="0.4,0.9">Adentro, otra tarjeta: “¿Y ahora?”</p>
+          </div>
+          <div class="bar-progress" aria-hidden="true"><i></i></div>
         </div>
-        <canvas class="llevas__canvas" aria-label="La caja y su doble fondo, en 3D"></canvas>
-        <header class="llevas__head"><span class="label">/06 — Qué te llevás</span></header>
-        <div class="llevas__caps">
-          <p class="cap" data-at="0.06,0.4">La caja tenía un doble fondo.</p>
-          <p class="cap" data-at="0.4,0.9">Adentro, otra tarjeta: “¿Y ahora?”</p>
+      </section>
+
+      <section class="msg pos" id="mensaje">
+        <div class="msg__tramas" aria-hidden="true">
+          <div class="t-circle msg__c1"></div>
+          <div class="t-semi msg__semi"></div>
         </div>
-        <div class="bar-progress" aria-hidden="true"><i></i></div>
-      </div>
-    </section>
+        <p class="msg__a">No siempre tenés que estar <em>haciendo</em> algo, <em>produciendo</em> o <em>ocupando</em> cada momento.</p>
+        <p class="msg__b">Estar <strong>quieto</strong>, sin intentar rendir, también es válido y necesario.</p>
+      </section>
 
-    <section class="msg pos" id="mensaje">
-      <div class="msg__tramas" aria-hidden="true">
-        <div class="t-circle msg__c1"></div>
-        <div class="t-semi msg__semi"></div>
-        <figure class="ph msg__ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1700,830,210,200"></figure>
-        <span class="tape msg__tape"></span>
-      </div>
-      <p class="msg__a">No siempre tenés que estar <em>haciendo</em> algo, <em>produciendo</em> o <em>ocupando</em> cada momento.</p>
-      <p class="msg__b">Estar <strong>quieto</strong>, sin intentar rendir, también es válido y necesario.</p>
-    </section>
-
-    <section class="llavero pos" id="llavero">
-      <div class="llavero__canvas-wrap" data-cursor="arrastrá">
-        <div class="llavero__back" aria-hidden="true">
-          <div class="t-circle llavero__circle"></div>
-          <div class="t-semi llavero__semi"></div>
+      <section class="llavero pos" id="llavero">
+        <div class="llavero__canvas-wrap" data-cursor="arrastrá">
+          <div class="llavero__back" aria-hidden="true">
+            <div class="t-circle llavero__circle"></div>
+            <div class="t-semi llavero__semi"></div>
+          </div>
+          <canvas class="llavero__canvas" aria-label="Llavero de acrílico flúor con forma de semicírculo, en 3D"></canvas>
         </div>
-        <canvas class="llavero__canvas" aria-label="Llavero de acrílico flúor con forma de semicírculo, en 3D"></canvas>
-      </div>
-      <div class="llavero__copy">
-        <p class="llavero__txt">El llavero: para reconocer tu ruido interno en el día a día.</p>
-      </div>
-    </section>
-
-    <!-- ============ REDES ============ -->
-    <section class="redes pos" id="redes">
-      <div class="redes__art" aria-hidden="true">
-        <figure class="ph is-color redes__poster" data-src="assets/img/brand-b.webp" data-size="2000,1417" data-crop="0,0,708,1417"></figure>
-        <span class="tape redes__tape1"></span>
-        <span class="tape redes__tape2"></span>
-        <figure class="ph is-color redes__strip" data-src="assets/img/brand-b.webp" data-size="2000,1417" data-crop="785,733,1215,300"></figure>
-      </div>
-      <header class="redes__head"><span class="label">/07 — Redes</span></header>
-      <div class="redes__main">
-        <a class="ig" href="https://www.instagram.com/pausa.inquieta/" target="_blank" rel="noopener" data-cursor="abrir">
-          <span class="ig__at">@</span><span class="ig__name">pausa.inquieta</span>
-        </a>
-      </div>
-      <footer class="foot">
-        <img class="foot__logo" src="assets/img/logo-black.png" alt="Pausa Inquieta" width="536" height="261">
-        <div class="foot__links">
-          <a href="recorrido.html" data-page>Volver al recorrido</a>
-          <a href="#hero">Volver arriba</a>
+        <div class="llavero__copy">
+          <p class="llavero__txt">El llavero: para reconocer tu ruido interno en el día a día.</p>
         </div>
-      </footer>
-    </section>
+      </section>
 
+      <!-- REDES -->
+      <section class="redes pos" id="redes">
+        <!-- La trama de círculos, dibujada (círculos con y sin relleno) -->
+        <div class="redes__band" aria-hidden="true">
+          <svg class="redes__circles" preserveAspectRatio="xMidYMid slice"></svg>
+        </div>
+        <div class="redes__art" aria-hidden="true">
+          <div class="city redes__city"><img src="assets/cut/city.png" alt="" width="640" height="330"></div>
+          <img class="cut redes__boy" src="assets/cut/boy-banner.png" alt="" width="320" height="314">
+        </div>
+        <header class="redes__head"><span class="label">/06 — Redes</span></header>
+        <div class="redes__main">
+          <a class="ig" href="https://www.instagram.com/pausa.inquieta/" target="_blank" rel="noopener" data-cursor="abrir">
+            <span class="ig__at">@</span><span class="ig__name">pausa.inquieta</span>
+          </a>
+        </div>
+        <footer class="foot">
+          <img class="foot__logo" src="assets/img/logo-black.png" alt="Pausa Inquieta" width="536" height="261">
+          <div class="foot__links">
+            <a href="recorrido.html" data-page>Volver al recorrido</a>
+            <a href="#hero">Volver arriba</a>
+          </div>
+        </footer>
+      </section>
+
+    </div>
   </main>
 
   <div class="grain" aria-hidden="true"></div>

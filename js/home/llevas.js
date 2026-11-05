@@ -41,9 +41,8 @@ export default function llevas() {
   });
   // Tramas del fondo: rasgadas y con un poco de parallax
   sec.querySelectorAll('.ph').forEach((ph) => torn(ph, { amp: 2 }));
-  document.querySelectorAll('.msg .ph').forEach((ph) => torn(ph, { amp: 2.4 }));
   gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: 'bottom bottom', scrub: 1 } })
-    .to('.llevas__ph', { yPercent: 18, ease: 'none' }, 0)
+    .to('.llevas__city', { yPercent: -10, ease: 'none' }, 0)
     .to('.llevas__semi', { rotate: 270, ease: 'none' }, 0)
     .to('.llevas__tramas', { opacity: 0.25, ease: 'none' }, 0.75);
   // Negativo → positivo

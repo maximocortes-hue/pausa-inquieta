@@ -26,7 +26,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
@@ -191,36 +191,30 @@ html.no-cursor .cursor, html.no-cursor .cursor-ring { display: none; }
   html:not(.no-cursor), html:not(.no-cursor) a, html:not(.no-cursor) button { cursor: none; }
 }
 
-/* ---------- Corazón (HUD) ---------- */
-.heart {
+/* ---------- PI: la mascota (el semicírculo) ---------- */
+.pi {
   position: fixed;
   left: var(--gutter); bottom: calc(var(--gutter) * .6);
-  width: 58px; height: 58px;
-  z-index: 120;
-  opacity: 0;
+  width: 64px; height: 64px;
+  z-index: 160;
   pointer-events: auto;
+  transform-origin: 50% 50%;
 }
-.heart__core { position: absolute; inset: 8px; }
-.heart__pausa, .heart__inq {
-  position: absolute; top: 0; bottom: 0; width: 50%;
-}
-.heart__pausa {
+.pi__body { position: absolute; inset: 0; transform-origin: 50% 70%; }
+.pi__core { position: absolute; inset: 9px; }
+.pi__pausa, .pi__inq { position: absolute; top: 0; bottom: 0; width: 50%; }
+.pi__pausa {
   left: 0;
   background: var(--lime);
   border-radius: 999px 0 0 999px;
   box-shadow: 0 0 24px rgba(215, 255, 58, .55);
 }
-.heart__inq {
-  right: 0;
-  border-radius: 0 999px 999px 0;
-  overflow: hidden;
-  opacity: 0;
-}
-.heart__inq canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
-.heart__ring { position: absolute; inset: 0; transform: rotate(-90deg); }
-.heart__ring circle { fill: none; stroke: var(--lime); stroke-width: 1.5; opacity: .9; }
-.heart__ring .track { stroke: rgba(255,255,255,.14); }
-.heart__tip {
+.pi__inq { right: 0; border-radius: 0 999px 999px 0; overflow: hidden; opacity: 0; }
+.pi__inq canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+.pi__ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+.pi__ring circle { fill: none; stroke: var(--lime); stroke-width: 1.5; opacity: .9; }
+.pi__ring .track { stroke: rgba(255,255,255,.14); }
+.pi__tip {
   position: absolute; left: calc(100% + 12px); top: 50%;
   transform: translateY(-50%);
   font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
@@ -228,12 +222,64 @@ html.no-cursor .cursor, html.no-cursor .cursor-ring { display: none; }
   transition: opacity .3s;
   mix-blend-mode: difference; color: #fff;
 }
-.heart:hover .heart__tip { opacity: .85; }
+.pi:hover .pi__tip { opacity: .85; }
+body.pi-talking .pi__ring, body.pi-talking .pi__tip { opacity: 0; }
 @media (max-width: 860px) {
-  .heart { left: auto; right: 12px; bottom: 12px; width: 46px; height: 46px; }
-  .heart__core { inset: 6px; }
-  .heart__tip { display: none; }
+  .pi { left: auto; right: 12px; bottom: 12px; width: 52px; height: 52px; }
+  .pi__core { inset: 7px; }
+  .pi__tip { display: none; }
 }
+
+/* Diálogo: la pantalla se oscurece, PI al centro, el texto al lado */
+.pi-stage { position: fixed; inset: 0; z-index: 150; pointer-events: none; visibility: hidden; }
+.pi-stage.is-on { pointer-events: auto; visibility: visible; cursor: pointer; }
+.pi-dim {
+  position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(ellipse 70% 60% at 30% 50%, rgba(11,11,11,.72), rgba(11,11,11,.94));
+  backdrop-filter: blur(3px) grayscale(.4);
+  -webkit-backdrop-filter: blur(3px) grayscale(.4);
+}
+.pi-bubble {
+  position: absolute;
+  color: var(--paper);
+  font-family: var(--f-logo);
+  font-weight: 300;
+  font-size: clamp(24px, 2.6vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -.02em;
+  opacity: 0;
+}
+.pi-bubble__text { min-height: 1.2em; }
+.pi-bubble__next {
+  display: inline-block; margin-top: 18px;
+  width: 12px; height: 24px; background: var(--lime);
+  border-radius: 999px 0 0 999px; transform: scaleX(-1);
+  opacity: 0;
+}
+.pi-bubble__next.is-on { animation: piNext 1s steps(2) infinite; }
+@keyframes piNext { 0% { opacity: 1; } 50% { opacity: 0; } }
+.pi-w { display: inline-block; white-space: nowrap; }
+.pi-ch { opacity: 0; filter: blur(5px); display: inline-block; transition: filter .22s ease, opacity .12s; }
+.pi-ch.is-in { opacity: .55; }
+.pi-ch.is-clear { opacity: 1; filter: none; }
+@media (max-width: 760px) { .pi-bubble { font-size: 23px; } }
+
+/* Mensaje corto desde la esquina */
+.pi-quip {
+  position: fixed; z-index: 161;
+  max-width: min(320px, 70vw);
+  padding: 10px 14px 12px;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--f-logo); font-size: 16px; line-height: 1.2;
+  border: 1px solid rgba(236,235,229,.25);
+  visibility: hidden; opacity: 0;
+  pointer-events: none;
+}
+.pi-quip::before { /* colita hacia PI */
+  content: ""; position: absolute; left: -8px; bottom: 14px;
+  border: 8px solid transparent; border-left: 0; border-right-color: var(--ink);
+}
+.pi-quip.is-right::before { left: auto; right: -8px; border-right: 0; border-left: 8px solid var(--ink); }
 
 /* ---------- Nav ---------- */
 .nav {
@@ -377,3 +423,7 @@ html.no-cursor .cursor, html.no-cursor .cursor-ring { display: none; }
   .grain { animation: none; }
   .gate__semi { animation: none; }
 }
+
+/* Tensión (cuando PI dice que no está solo) */
+html.tense .grain { opacity: .22; animation-duration: .35s; }
+html.tense main { filter: contrast(1.25) brightness(.85); transition: filter .6s; }

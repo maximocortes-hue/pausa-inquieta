@@ -33,7 +33,6 @@ export default function hero() {
   if (document.fonts) document.fonts.ready.then(track);
   window.addEventListener('resize', track);
 
-  sec.querySelectorAll('.hero__ph').forEach((p) => torn(p, { amp: 2.5 }));
   torn(sec.querySelector('.hero__sun-core'), { amp: 1.6, step: 2.4, sides: 'tlb' });
   const px = pixels(sec.querySelector('.hero__tramas'), { n: 14, colors: ['#1f3cff', '#a47cff', '#ecebe5', '#d7ff3a'], area: innerWidth < 760 ? [50, 50, 96, 94] : [66, 8, 98, 92] });
   const orb = orbit(sec.querySelector('.hero__tramas'), {
@@ -49,7 +48,7 @@ export default function hero() {
   const sun = sec.querySelector('.hero__sun');
   const sunCore = sec.querySelector('.hero__sun-core');
   const tramas = sec.querySelectorAll('.hero__tramas > .t-circle, .hero__tramas > .t-bar, .hero__ast');
-  const photos = sec.querySelectorAll('.hero__ph');
+  const photos = sec.querySelectorAll('.hero__city, .hero__boy');
   const brand = sec.querySelector('.hero__brand');
 
   gsap.set(chars, { opacity: 0, yPercent: 40 });
@@ -84,7 +83,6 @@ export default function hero() {
     .to(sunCore, { scale: 1.035, duration: 0.1 })
     .to(sunCore, { scale: 1, duration: 0.5, ease: 'power2.out' })
     .to({}, { duration: 0.35 });
-  beat.eventCallback('onRepeat', () => { if (window.scrollY < innerHeight * 0.6) sound.beat(0.25); });
 
   // Pesos que tiemblan hasta encontrar su lugar
   function scramble(list, dur = 1.4) {

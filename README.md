@@ -55,6 +55,16 @@ assets/img/           Logo, imágenes del brandboard y texturas
 - **Voz** (“No hagas nada”, “Te dije que no hagas nada”): hoy se muestra como subtítulo. Si existe la grabación,
   se puede sumar.
 
+## Cómo funciona
+
+- **Home**: hero → quiénes somos → promesa → controles → recorrido. En la promesa se presenta **PI** (el semicírculo):
+  habla en el centro (las frases avanzan con clic) y después se queda en su esquina. Debajo del botón Iniciar hay un
+  **candado**: no se puede seguir hasta hacer el recorrido. Al volver, se abre y aparecen qué te llevás, el llavero y redes.
+- **Recorrido**: 8 etapas; cada una se presenta con su título y PI la cuenta al lado de lo que pasa. Las etapas 01 y 02
+  son 3D (`js/three/aula.js`, `js/three/salon.js`). Mientras avanzás, la página pierde el color y se vuelve hostil
+  (`js/recorrido/hostile.js`). Lo que se marca como hecho se guarda en `sessionStorage` (`pi-met`, `pi-recorrido-done`).
+- **Personas recortadas**: `assets/cut/` (PNG con fondo transparente, sacados del brandboard) y la ciudad sin cielo.
+
 ## Detalles de interacción
 
 - La entrada es una invitación a conocer tu ruido: se entra con sonido (se puede apagar desde la nav).

@@ -18,7 +18,7 @@ const bounce = (t) => {
 };
 
 // ---------- Texturas dibujadas en canvas ----------
-function paperCanvas(w, h, base = 18) {
+export function paperCanvas(w, h, base = 18) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   const x = c.getContext('2d');
@@ -32,14 +32,14 @@ function paperCanvas(w, h, base = 18) {
   return [c, x];
 }
 
-function toTex(c) {
+export function toTex(c) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
   return t;
 }
 
-function lidTexture(ratio) {
+export function lidTexture(ratio) {
   const w = 1024, h = Math.round(1024 * ratio);
   const [c, x] = paperCanvas(w, h, 20);
   x.fillStyle = '#d9d8d0';
@@ -50,7 +50,7 @@ function lidTexture(ratio) {
   return toTex(c);
 }
 
-function cardTextTexture(lines, white = false) {
+export function cardTextTexture(lines, white = false) {
   const w = 1024, h = 646;
   const [c, x] = paperCanvas(w, h, white ? 238 : 12);
   x.fillStyle = white ? '#0b0b0b' : '#ecebe5';
@@ -62,7 +62,7 @@ function cardTextTexture(lines, white = false) {
   return toTex(c);
 }
 
-function cardSemiTexture(white = false) {
+export function cardSemiTexture(white = false) {
   const w = 1024, h = 646;
   const [c, x] = paperCanvas(w, h, white ? 238 : 12);
   x.save();
@@ -84,7 +84,7 @@ function cardSemiTexture(white = false) {
   return toTex(c);
 }
 
-function blobTexture() {
+export function blobTexture() {
   const c = document.createElement('canvas');
   c.width = c.height = 256;
   const x = c.getContext('2d');
@@ -97,7 +97,7 @@ function blobTexture() {
 }
 
 // ---------- Geometría ----------
-function buildBox() {
+export function buildBox() {
   const W = 3, D = 2.1, H = 0.78, t = 0.035;
   const mat = new THREE.MeshStandardMaterial({ color: 0x161616, roughness: 0.86 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.95 });
@@ -141,7 +141,7 @@ function buildBox() {
   return { group, base, lid, fb, W, D, H, t };
 }
 
-function buildCard(lines, white = false) {
+export function buildCard(lines, white = false) {
   const CW = 1.9, CH = 1.2;
   const g = new THREE.Group();
   // La tarjeta blanca se ilumina un poco sola para no quedar gris bajo las luces violetas
@@ -159,7 +159,7 @@ function buildCard(lines, white = false) {
   return g;
 }
 
-function buildOrbit() {
+export function buildOrbit() {
   // Bien abierta: rodea la caja sin atravesarla
   const curve = new THREE.EllipseCurve(0, 0, 4.4, 2.55, 0, Math.PI * 2);
   const pts = curve.getPoints(160).map((p) => new THREE.Vector3(p.x, 0, p.y));

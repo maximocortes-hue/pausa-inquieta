@@ -1,0 +1,241 @@
+/* =========================================================
+   PASO A PASO — PI cuenta, la página se vuelve hostil
+   (se carga después de recorrido.css y lo ajusta)
+   ========================================================= */
+
+/* El texto ya no va en la esquina: lo cuenta PI al lado de lo que pasa */
+.copy { display: none; }
+
+/* PI como narrador: a la izquierda, a la altura de lo que pasa */
+body.rec .pi { left: var(--gutter); top: 50%; bottom: auto; margin-top: -32px; }
+.narr {
+  position: fixed; z-index: 135;
+  left: calc(var(--gutter) + 96px); top: 50%;
+  transform: translateY(-50%);
+  width: min(400px, 31vw);
+  padding: 18px 20px 20px;
+  background: rgba(11,11,11,.88);
+  color: var(--paper);
+  border: 1px solid rgba(236,235,229,.18);
+  visibility: hidden; opacity: 0;
+  cursor: pointer;
+}
+.narr::before {
+  content: ""; position: absolute; left: -10px; top: 50%; margin-top: -10px;
+  border: 10px solid transparent; border-left: 0; border-right-color: rgba(11,11,11,.88);
+}
+.narr__kicker { display: block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--lime); margin-bottom: 10px; }
+.narr__text { font-family: var(--f-grot); font-size: clamp(16px, 1.3vw, 20px); line-height: 1.35; min-height: 3em; }
+@media (max-width: 860px) {
+  body.rec .pi { top: auto; bottom: 14px; margin-top: 0; left: 12px; right: auto; }
+  .narr { left: 74px; right: 12px; top: auto; bottom: 12px; transform: none; width: auto; padding: 12px 14px; }
+  .narr::before { top: auto; bottom: 18px; margin-top: 0; }
+  .narr__text { font-size: 15px; min-height: 0; }
+}
+
+/* El área visual deja lugar al narrador */
+.door, .desk, .screen, .room, .hheart, .pcs, .lights, .hoods, .wall, .frames, .stairs, .dominos, .split, .pedestal, .bigsemi, .monitors, .classroom {
+  left: 42%; right: 4%;
+}
+.hheart { left: 42%; right: 4%; }
+@media (max-width: 860px) {
+  .door, .desk, .screen, .room, .hheart, .pcs, .lights, .hoods, .wall, .frames, .stairs, .dominos, .split, .pedestal, .bigsemi, .monitors, .classroom {
+    left: 4%; right: 4%; top: 10%; bottom: 30%;
+  }
+}
+
+/* ---------- Títulos de etapa (en grande) ---------- */
+.etapa { position: relative; height: 170vh; }
+.etapa__stage {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  display: grid; place-items: center; align-content: center; gap: 2vh;
+  text-align: center; padding: var(--gutter);
+}
+.etapa--dark .etapa__stage { background: var(--ink) url("../assets/img/dust-light.svg") 0 0 / 520px; color: var(--paper); }
+.etapa--violet .etapa__stage { background: radial-gradient(ellipse 70% 60% at 50% 60%, rgba(164,124,255,.35), transparent 70%), var(--ink); color: var(--paper); }
+.etapa--light .etapa__stage { background: var(--paper) url("../assets/img/paper.svg") 0 0 / 640px; color: var(--ink); }
+.etapa--noise .etapa__stage { background: #111; color: var(--paper); }
+.etapa__num {
+  font-family: var(--f-logo); font-weight: 900;
+  font-size: clamp(90px, 20vw, 320px); line-height: .8;
+  color: transparent; -webkit-text-stroke: 1.5px currentColor;
+  opacity: 0;
+}
+.etapa--dark .etapa__num, .etapa--violet .etapa__num { -webkit-text-stroke-color: var(--lime); }
+.etapa__title {
+  font-family: var(--f-logo); font-weight: 300;
+  font-size: clamp(36px, 6.4vw, 110px); line-height: 1; letter-spacing: -.035em;
+  max-width: 14ch;
+}
+.etapa__title .ch { opacity: 0; display: inline-block; }
+
+/* ---------- 3D ---------- */
+.scene--3d .stage { background: var(--ink); }
+.world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scene--3d .voice { z-index: 6; }
+
+/* ---------- Capas hostiles ---------- */
+.bw {
+  position: fixed; inset: 0; z-index: 170; pointer-events: none;
+  -webkit-backdrop-filter: grayscale(var(--g, 0)); backdrop-filter: grayscale(var(--g, 0));
+  opacity: 0;
+}
+.hostile { position: fixed; inset: 0; z-index: 125; pointer-events: none; }
+.hole-x { position: absolute; transform-origin: 50% 50%; }
+.hole-x[data-kind="ink"] { background: var(--ink) url("../assets/img/dust-light.svg") 0 0 / 300px; }
+.hole-x[data-kind="paper"] { background: var(--paper) url("../assets/img/paper.svg") 0 0 / 300px; }
+.hole-x canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.floaters { position: fixed; inset: 0; pointer-events: none; z-index: 128; }
+.floaters span {
+  position: absolute; left: 0; top: 0;
+  font-family: var(--f-logo); white-space: nowrap;
+  text-shadow: 0 0 20px rgba(0,0,0,.35);
+  will-change: transform;
+}
+.pi-ghost {
+  position: fixed; left: 0; top: 0; z-index: 190; pointer-events: none;
+  width: 24px; height: 48px; margin-top: -24px;
+  border-radius: 0 999px 999px 0; overflow: hidden;
+}
+.pi-ghost canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+/* ---------- 03 · El proyector del aula (bien claro que es el aula física) ---------- */
+.classroom { position: absolute; top: 12%; bottom: 8%; display: grid; place-items: center; }
+.classroom__tag {
+  position: absolute; left: 0; top: 0; z-index: 2;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  padding: 6px 10px; background: var(--ink); color: var(--paper);
+}
+.classroom__projector { position: absolute; left: 50%; top: 2%; width: 60px; height: 26px; margin-left: -30px; background: #222; border-radius: 4px; z-index: 2; }
+.classroom__projector i { position: absolute; left: 50%; bottom: -6px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #fffbe0; box-shadow: 0 0 20px #fffbe0; }
+.classroom__beam { position: absolute; left: 50%; top: 6%; width: 86%; height: 64%; transform: translateX(-50%); background: linear-gradient(rgba(255,240,180,.4), rgba(255,240,180,0)); clip-path: polygon(47% 0, 53% 0, 100% 100%, 0 100%); pointer-events: none; z-index: 1; }
+.classroom .screen { position: relative; inset: auto; width: 76%; max-height: none; margin: 8% auto 0; }
+.classroom__desks { position: absolute; left: 6%; right: 6%; bottom: 0; height: 14%; display: flex; justify-content: space-between; align-items: flex-end; }
+.classroom__desks i { width: 14%; height: 70%; background: #cfccc3; border-top: 4px solid #a9a69d; }
+
+/* ---------- 04 · Las computadoras ---------- */
+.monitors { position: absolute; top: 14%; bottom: 10%; display: flex; align-items: center; justify-content: center; gap: 2%; perspective: 900px; }
+.mon { position: relative; width: 18%; flex: none; transform: rotateY(18deg); }
+.mon:nth-child(2) { transform: rotateY(10deg) translateY(-8%); }
+.mon:nth-child(3) { transform: rotateY(0deg) translateY(6%); }
+.mon:nth-child(4) { transform: rotateY(-10deg) translateY(-6%); }
+.mon--far { transform: rotateY(-20deg) scale(1.1); }
+.mon::after { content: ""; position: absolute; left: 42%; right: 42%; top: 100%; height: 14px; background: var(--ink); }
+.mon__scr {
+  position: relative; aspect-ratio: 16 / 10;
+  background: #0d0d0d; border: 6px solid #1c1c1c; border-radius: 4px;
+  overflow: hidden; display: grid; place-items: center;
+  transition: background .25s;
+}
+.mon.is-on .mon__scr { background: linear-gradient(135deg, #2a1663, #1f3cff); box-shadow: 0 0 30px rgba(31,60,255,.35); }
+.mon__scr svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mon__scr path { fill: none; stroke: var(--lime); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 4px var(--lime)); }
+.mon > span { position: absolute; left: 0; right: 0; top: calc(100% + 22px); text-align: center; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+.mon--you.is-focus .mon__scr { outline: 3px solid var(--red); outline-offset: 5px; }
+.mon__pi { position: relative; width: 26%; aspect-ratio: 1; margin-bottom: 18%; opacity: 0; transition: opacity .4s; }
+.mon__pi i { position: absolute; top: 0; bottom: 0; width: 50%; }
+.mon__pi i:first-child { left: 0; background: var(--lime); border-radius: 999px 0 0 999px; box-shadow: 0 0 16px var(--lime); }
+.mon__pi i:last-child { right: 0; border: 2px solid var(--paper); border-left: 0; border-radius: 0 999px 999px 0; }
+.mon--far.is-on .mon__pi { opacity: 1; }
+.mon__q { position: absolute; left: 0; right: 0; bottom: 8%; text-align: center; font-style: normal; font-family: var(--f-logo); color: var(--paper); font-size: clamp(10px, 1.2vw, 17px); }
+@media (max-width: 860px) { .monitors { flex-wrap: wrap; align-content: center; gap: 16px 4%; } .mon { width: 30%; } }
+
+/* ---------- 04 · Las luces: el piso con botones ---------- */
+.lights__floor { perspective: 600px; }
+.lights__floor .lights__pads { transform: rotateX(48deg); }
+
+/* ---------- 05 · El pasillo: marcos vacíos en el piso ---------- */
+.frames__floor { position: absolute; left: 42%; right: 4%; bottom: 3%; height: 9%; display: flex; justify-content: space-around; align-items: flex-end; perspective: 500px; z-index: 1; }
+.frames__floor i { width: 16%; height: 100%; border: 5px solid #2a1f52; transform: rotateX(70deg); }
+@media (max-width: 860px) { .frames__floor { left: 4%; bottom: 31%; } }
+
+/* ---------- 06 · La escalera infinita, en perspectiva ---------- */
+.stairs { perspective: 700px; perspective-origin: 50% 10%; overflow: visible; }
+.stairs__world { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .45s steps(4); }
+.stairs__track { --loop: 0; position: absolute; left: 50%; top: 66%; width: 46%; height: 1px; transform-style: preserve-3d; transform: translateX(-50%) rotateX(56deg); }
+.stairs__track i {
+  --step: 8vh;
+  position: absolute; left: 0; right: 0; width: auto; height: var(--step); display: block;
+  top: calc((var(--i) - var(--loop)) * var(--step) * -1);
+  transform: translateZ(calc((var(--i) - var(--loop)) * var(--step) * .9));
+  background: linear-gradient(#f1f0ec, #b8b3d6);
+  box-shadow: 0 0 22px rgba(164,124,255,.45);
+  opacity: calc(1 - var(--i) * .05);
+}
+.stairs__track i b { position: absolute; left: 0; right: 0; top: 100%; height: 90%; background: #2a1f52; transform-origin: top; transform: rotateX(-90deg); }
+.stairs__door { position: absolute; left: 50%; top: 30%; width: 16%; aspect-ratio: 1 / 2; right: auto; transform: translate(-50%, -50%); }
+
+/* ---------- 06 · Dominós: la frase hecha de fichas ---------- */
+.dominos__row { position: absolute; left: 6%; right: 6%; bottom: 8%; height: 26%; justify-content: center; }
+.domino--first { cursor: grab; touch-action: none; }
+.dominos__phrase { position: absolute; left: 4%; right: 4%; top: 4%; height: 56%; }
+.dominos__phrase i {
+  position: absolute; display: block;
+  width: calc(100% / var(--cols) * .62); height: calc(100% / var(--rows) * .92);
+  background: #f1f0ec; border-radius: 2px; box-shadow: 0 0 8px rgba(215,255,58,.35);
+  opacity: 0;
+}
+.dominos__msg { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- 08 · Después: el ruido, el proyector, las escenas que se resuelven ---------- */
+.after {
+  position: absolute; top: calc(var(--nav-h) + 2vh); right: 4%; bottom: 4%; left: 42%;
+  display: grid; grid-template-columns: 1.4fr 1fr; grid-template-rows: auto 1fr; gap: 18px;
+  opacity: 0; z-index: 3;
+}
+.after__projector { grid-column: 1 / -1; position: relative; }
+.after__tag { display: inline-block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 6px 10px; background: var(--paper); color: var(--ink); margin-bottom: 10px; }
+.after__screen {
+  display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center;
+  padding: clamp(18px, 2.4vw, 36px);
+  background: #f4f3ee; color: var(--ink);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.2), 0 30px 80px rgba(0,0,0,.6);
+}
+.after__pi { position: relative; width: clamp(60px, 7vw, 110px); aspect-ratio: 1; }
+.after__pi i { position: absolute; top: 0; bottom: 0; width: 50%; overflow: hidden; }
+.after__pi i:first-child { left: 0; background: var(--ink); border-radius: 999px 0 0 999px; }
+.after__pi i:last-child { right: 0; border-radius: 0 999px 999px 0; }
+.after__pi canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.after__quote { margin: 0; font-family: var(--f-logo); font-weight: 300; font-size: clamp(17px, 1.7vw, 28px); line-height: 1.22; letter-spacing: -.02em; min-height: 6em; }
+.after__reel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+.reel { position: relative; aspect-ratio: 16 / 10; background: #0d0d0d; border: 1px solid rgba(236,235,229,.2); overflow: hidden; }
+.reel i { position: absolute; display: block; }
+.reel--cubes .rc { left: 50%; top: 50%; width: 14%; aspect-ratio: 1; margin: -7% 0 0 -7%; background: #ddd; }
+.reel--cubes .rh { width: 12%; aspect-ratio: 1; background: #fff; opacity: .7; }
+.reel--cubes .rh1 { left: 44%; top: 4%; }
+.reel--cubes .rh2 { right: 4%; top: 40%; }
+.reel--cubes .rh3 { left: 44%; bottom: 4%; }
+.reel--cubes .rh4 { left: 4%; top: 40%; }
+.after__reel.is-on .reel--cubes .rc { animation: rcube 3s ease-in-out infinite; }
+.after__reel.is-on .reel--cubes .rh2, .after__reel.is-on .reel--cubes .rh3, .after__reel.is-on .reel--cubes .rh4 { animation: rgone 3s ease-in-out infinite; }
+@keyframes rcube { 0%, 15% { transform: none; } 55%, 100% { transform: translate(0, -250%); } }
+@keyframes rgone { 0%, 50% { opacity: .7; } 65%, 100% { opacity: 0; } }
+.reel--lights { display: flex; justify-content: center; align-items: center; gap: 6%; }
+.reel--lights i { position: relative; width: 5%; height: 70%; background: #aaa; border-radius: 99px; }
+.reel--lights i:nth-child(odd) { height: 40%; }
+.after__reel.is-on .reel--lights i { animation: rlight 3s ease-in-out infinite; }
+@keyframes rlight { 0%, 20% { height: 40%; opacity: .4; } 60%, 100% { height: 70%; opacity: 1; } }
+.reel--frames { display: flex; justify-content: space-around; align-items: center; }
+.reel--frames i { position: relative; width: 22%; height: 46%; border: 4px solid #bbb; transform: rotate(-14deg); }
+.reel--frames i:nth-child(2) { transform: rotate(12deg); }
+.after__reel.is-on .reel--frames i { animation: rframe 3s ease-in-out infinite; }
+@keyframes rframe { 70%, 100% { transform: rotate(0); } }
+.reel--dominos { display: flex; justify-content: center; align-items: flex-end; gap: 5%; padding-bottom: 14%; }
+.reel--dominos i { position: relative; width: 4%; height: 50%; background: #ddd; transform-origin: 100% 100%; }
+.after__reel.is-on .reel--dominos i { animation: rdom 3s ease-in infinite; }
+.after__reel.is-on .reel--dominos i:nth-child(2) { animation-delay: .1s; }
+.after__reel.is-on .reel--dominos i:nth-child(3) { animation-delay: .2s; }
+.after__reel.is-on .reel--dominos i:nth-child(4) { animation-delay: .3s; }
+.after__reel.is-on .reel--dominos i:nth-child(5) { animation-delay: .4s; }
+.after__reel.is-on .reel--dominos i:nth-child(6) { animation-delay: .5s; }
+.after__reel.is-on .reel--dominos i:nth-child(7) { animation-delay: .6s; }
+.after__reel.is-on .reel--dominos i:nth-child(8) { animation-delay: .7s; }
+@keyframes rdom { 0%, 20% { transform: none; } 40%, 100% { transform: rotate(68deg); } }
+.after__side { display: grid; align-content: space-between; gap: 18px; }
+.after__stat b { display: block; font-family: var(--f-logo); font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; color: var(--paper); }
+.after__stat span { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; opacity: .75; }
+.after__cta { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 860px) {
+  .after { top: var(--nav-h); left: 4%; bottom: 26%; grid-template-columns: 1fr; overflow: auto; }
+  .after__reel { grid-template-columns: repeat(4, 1fr); }
+}

@@ -56,9 +56,6 @@
 .hero__b3 { width: 12px; height: clamp(50px, 9vh, 110px); background: var(--blue); right: 44vw; top: 11vh; }
 .hero__ast { width: clamp(40px, 4.5vw, 72px); color: var(--blue); left: 52vw; bottom: 6vh; }
 
-.hero__ph { position: absolute; margin: 0; }
-.hero__ph2 { right: 2vw; bottom: 0; height: 50vh; z-index: 2; }
-.hero__ph3 { right: 4vw; top: calc(var(--nav-h) + 4vh); height: 18vh; z-index: 2; transform: rotate(3deg); }
 
 .hero__sun {
   position: absolute;
@@ -114,8 +111,6 @@
   .hero { justify-content: flex-start; padding-top: calc(var(--nav-h) + 8vh); }
   .logo { font-size: 16vw; }
   .hero__sun { right: 8vw; top: auto; bottom: 30vh; width: 26vw; }
-  .hero__ph2 { right: -4vw; height: 42vh; }
-  .hero__ph3 { right: auto; left: var(--gutter); top: auto; bottom: 14vh; height: 13vh; }
   .hero__c1 { right: 46vw; bottom: 30vh; width: 18vw; }
   .hero__c3 { left: -16vw; bottom: -8vh; width: 40vw; }
   .hero__b3, .hero__c2 { display: none; }
@@ -167,10 +162,6 @@
 .somos__collage { position: absolute; inset: 0; pointer-events: none; }
 .somos__c1 { width: clamp(220px, 30vw, 520px); aspect-ratio: 1; background: var(--blue); right: -6vw; top: -10vh; }
 .somos__semi { width: clamp(90px, 10vw, 180px); background: var(--violet); right: 34vw; bottom: 6vh; z-index: 2; }
-.somos__ph1 { position: absolute; margin: 0; right: 7vw; top: 11vh; height: 78vh; z-index: 1; transform: rotate(1.5deg); }
-.somos__ph2 { position: absolute; margin: 0; right: 30vw; top: 13vh; height: 30vh; z-index: 2; transform: rotate(-3deg); }
-.somos__tape1 { right: 18vw; top: 9vh; transform: rotate(-6deg); }
-.somos__tape2 { right: 31vw; top: 11vh; width: 70px; transform: rotate(8deg); }
 .somos__dot { width: clamp(28px, 3vw, 48px); aspect-ratio: 1; background: var(--red); right: 37vw; top: 48vh; z-index: 3; }
 .somos__bar { width: clamp(80px, 9vw, 150px); height: 16px; background: var(--lime); right: 4vw; bottom: 10vh; z-index: 3; }
 
@@ -178,10 +169,6 @@
   .somos__lines { right: var(--gutter); top: auto; bottom: 12vh; transform: none; min-height: 46vh; }
   .s-line { top: auto; bottom: 0; transform: none; font-size: clamp(25px, 7vw, 42px); }
   .s-line--big, .s-line--close { font-size: 15vw; }
-  .somos__ph1 { right: -8vw; top: 8vh; height: 46vh; opacity: .9; }
-  .somos__ph2 { right: 50vw; top: 16vh; height: 16vh; }
-  .somos__tape1 { right: 22vw; top: 7vh; }
-  .somos__tape2 { display: none; }
   .somos__semi { right: 66vw; bottom: auto; top: 34vh; width: 18vw; }
   .somos__dot { right: 54vw; top: 40vh; }
   .somos__bar { display: none; }
@@ -198,8 +185,6 @@
   display: grid; place-items: center;
   padding: var(--gutter);
 }
-.promesa__ph { left: -3vw; bottom: -2vh; height: 66vh; opacity: .34; }
-.promesa__ph2 { right: -2vw; top: 8vh; height: 58vh; opacity: .26; }
 .promesa__label { position: absolute; top: calc(var(--nav-h) + 3vh); left: var(--gutter); z-index: 2; }
 .promesa__halo {
   position: absolute; left: 50%; top: 50%;
@@ -229,8 +214,6 @@
   z-index: 2;
 }
 @media (max-width: 760px) {
-  .promesa__ph { height: 46vh; left: -20vw; }
-  .promesa__ph2 { height: 36vh; }
 }
 
 /* =========================================================
@@ -375,7 +358,6 @@
   background: #1a1a1a;
   transform: rotate(1.2deg);
 }
-.arena__ph { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; }
 .arena::after { /* tinta encima para que el personaje se lea */
   content: ""; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(11,11,11,.15), rgba(11,11,11,.55));
@@ -445,8 +427,6 @@
 .st--key { font-family: var(--f-logo); color: var(--lime); font-size: clamp(40px, 6.6vw, 118px); letter-spacing: -.04em; text-shadow: 0 0 40px rgba(215,255,58,.35); }
 .st--end { font-size: clamp(20px, 2.2vw, 36px); margin-top: 1.4em; max-width: 30ch; color: rgba(236,235,229,.82); }
 .st .w { opacity: .12; }
-.story__ph1 { right: 22vw; top: 13vh; height: 20vh; z-index: 2; transform: rotate(-4deg); }
-.story__ph2 { right: 4vw; bottom: 20vh; height: 38vh; z-index: 2; transform: rotate(2deg); }
 .story__tramas { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .story__c1 { width: clamp(40px, 5vw, 90px); aspect-ratio: 1; background: var(--red); right: 31vw; bottom: 30vh; }
 .story__b1 { width: 16px; height: clamp(80px, 14vh, 160px); background: var(--blue); right: 3vw; top: 18vh; }
@@ -481,8 +461,6 @@
 @media (max-width: 760px) {
   .story { padding-top: 34vh; }
   .story__text { max-width: none; }
-  .story__ph1 { top: 14vh; right: var(--gutter); height: 11vh; }
-  .story__ph2 { height: 24vh; bottom: 30vh; opacity: .45; }
   .story__c1 { right: 70vw; bottom: 22vh; }
   .st:nth-child(even) { margin-left: 0; }
 }
@@ -496,7 +474,6 @@
   padding: calc(var(--nav-h) + 3vh) var(--gutter) var(--gutter);
 }
 .llevas__tramas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.llevas__ph { left: 5vw; top: 18vh; height: 36vh; transform: rotate(-3deg); opacity: .85; }
 .llevas__semi { width: clamp(70px, 8vw, 140px); background: var(--violet); left: 30vw; bottom: -4vh; transform: rotate(90deg); }
 .llevas__c1 { width: clamp(30px, 3.5vw, 60px); aspect-ratio: 1; background: var(--red); right: 36vw; bottom: 16vh; }
 .llevas__b1 { width: 14px; height: 20vh; background: var(--blue); left: 2vw; bottom: 30vh; }
@@ -506,7 +483,6 @@
 .llevas__caps { z-index: 2; }
 .llevas .bar-progress { z-index: 2; }
 @media (max-width: 760px) {
-  .llevas__ph { top: auto; bottom: 26vh; height: 22vh; }
 }
 
 .msg {
@@ -517,8 +493,6 @@
 .msg__tramas { position: absolute; inset: 0; pointer-events: none; }
 .msg__c1 { width: clamp(60px, 7vw, 120px); aspect-ratio: 1; background: var(--red); right: 10vw; top: 12vh; }
 .msg__semi { width: clamp(70px, 8vw, 140px); background: var(--blue); left: -2vw; bottom: 10vh; }
-.msg__ph { left: 4vw; top: 6vh; height: 22vh; transform: rotate(-4deg); }
-.msg__tape { left: 7vw; top: 4.5vh; transform: rotate(5deg); }
 .msg__a, .msg__b {
   position: relative;
   font-family: var(--f-logo);
@@ -535,7 +509,6 @@
 .msg .w.strong { background: linear-gradient(var(--lime), var(--lime)) no-repeat 0 0 / 100% 100%; padding: 0 .12em; }
 @media (max-width: 760px) {
   .msg__a { margin-left: 0; margin-top: 16vh; }
-  .msg__ph { height: 16vh; }
 }
 
 .llavero {
@@ -569,10 +542,6 @@
   display: flex; flex-direction: column;
 }
 .redes__art { position: absolute; inset: 0; pointer-events: none; }
-.redes__poster { right: 6vw; top: 9vh; height: 74vh; transform: rotate(2.4deg); z-index: 1; }
-.redes__tape1 { right: 14vw; top: 7vh; transform: rotate(-7deg); }
-.redes__tape2 { right: 4vw; top: 78vh; transform: rotate(-38deg); }
-.redes__strip { left: -2vw; top: 20vh; width: 46vw; transform: rotate(-2deg); z-index: 0; }
 .redes__head { position: relative; z-index: 2; }
 .redes__main { position: relative; z-index: 2; flex: 1; display: grid; align-content: end; gap: 22px; padding: 8vh 0 6vh; }
 .ig {
@@ -607,9 +576,110 @@
 .foot__links a:hover { border-color: currentColor; }
 
 @media (max-width: 860px) {
-  .redes__poster { right: -10vw; top: 12vh; height: 52vh; }
-  .redes__tape1 { right: 20vw; top: 10vh; }
-  .redes__tape2 { display: none; }
-  .redes__strip { width: 80vw; top: auto; bottom: 30vh; }
   .ig { font-size: 11vw; }
+}
+
+/* =========================================================
+   PERSONAS RECORTADAS + CIUDAD (integradas, nunca fotos crudas)
+   ========================================================= */
+.cut {
+  position: absolute; display: block; height: auto; width: auto;
+  pointer-events: none; user-select: none;
+  filter: grayscale(1) contrast(1.12) drop-shadow(0 18px 22px rgba(0,0,0,.35));
+}
+.city { position: absolute; pointer-events: none; }
+.city img {
+  display: block; width: 100%; height: auto;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 90%, transparent), linear-gradient(#000 60%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000 90%, transparent), linear-gradient(#000 60%, transparent);
+  mask-composite: intersect;
+}
+
+/* Hero: la ciudad abajo a la derecha, el sol se asoma detrás, el chico sentado arriba */
+.hero__city { right: -3vw; bottom: -3vh; width: min(66vw, 1000px); z-index: 1; }
+.hero__boy { right: 5vw; bottom: 0; height: 50vh; z-index: 2; }
+.hero__sun { z-index: 0; }
+@media (max-width: 760px) {
+  .hero__city { width: 130vw; right: -34vw; bottom: 0; }
+  .hero__boy { height: 30vh; right: 0; }
+}
+
+/* Quiénes somos: la chica recortada; el pie sale hacia la promesa y se mueve apenas */
+.somos__stick { overflow-x: clip; overflow-y: visible; clip-path: inset(0 0 -40vh 0); z-index: 7; }
+.somos__lines { right: 47vw; }
+.somos__city { right: -6vw; bottom: 0; width: 60vw; z-index: 0; opacity: .92; }
+.somos__girl { position: absolute; right: 8vw; bottom: -14vh; height: 86vh; aspect-ratio: 520 / 760; z-index: 2; pointer-events: none; }
+.somos__girl img { position: absolute; inset: 0; width: 100%; height: 100%; filter: grayscale(1) contrast(1.12) drop-shadow(0 20px 24px rgba(0,0,0,.3)); }
+.somos__girl-body { clip-path: polygon(0 0, 100% 0, 100% 100%, 60% 100%, 60% 70.6%, 0 71.6%); }
+.somos__girl-foot {
+  clip-path: polygon(0 71.4%, 60% 70.4%, 60% 100%, 0 100%);
+  transform-origin: 44% 72%;
+  animation: footSwing 2.8s ease-in-out infinite;
+}
+@keyframes footSwing { 0%, 100% { rotate: -2deg; } 50% { rotate: 3.2deg; } }
+@media (max-width: 860px) {
+  .somos__lines { right: var(--gutter); }
+  .somos__city { width: 130vw; right: -40vw; bottom: 36vh; }
+  .somos__girl { right: -6vw; bottom: auto; top: 10vh; height: 52vh; }
+}
+@media (prefers-reduced-motion: reduce) { .somos__girl-foot { animation: none; } }
+
+/* Promesa: la ciudad apagada abajo */
+.promesa__city { left: -6vw; right: -6vw; bottom: -6vh; z-index: 0; opacity: .2; filter: grayscale(1); }
+
+/* Controles: el escenario es la ciudad */
+.arena__city { left: -4%; right: -4%; bottom: 8%; z-index: 0; filter: grayscale(.35); }
+.arena { background: var(--ink) url("../assets/img/dust-light.svg") 0 0 / 520px; }
+
+/* Recorrido (intro): la chica sentada sobre la ciudad */
+.story__art { position: absolute; right: 0; top: 24vh; width: 44vw; height: 64vh; z-index: 2; pointer-events: none; }
+.story__city { right: -4vw; bottom: 0; width: 48vw; opacity: .9; }
+.story__girl { right: 8vw; bottom: 26%; height: 46vh; }
+@media (max-width: 760px) {
+  .story__art { top: 8vh; width: 100vw; height: 30vh; opacity: .6; }
+  .story__city { width: 100vw; right: -10vw; }
+  .story__girl { height: 22vh; right: 4vw; }
+}
+
+/* Qué te llevás: ciudad apagada */
+.llevas__city { left: -2vw; right: -2vw; bottom: -8vh; opacity: .22; filter: grayscale(1); }
+
+/* =========================================================
+   CANDADO — no se pasa hasta hacer el recorrido
+   ========================================================= */
+.after { display: none; }
+html.unlocked .after { display: block; }
+.lockwall {
+  position: relative; z-index: 3;
+  display: grid; place-items: center; gap: 14px;
+  padding: 12vh 0 10vh;
+}
+html.unlocked:not(.unlocking) .lockwall { display: none; }
+.lock { width: clamp(70px, 7vw, 100px); }
+.lock svg { width: 100%; height: auto; overflow: visible; display: block; }
+.lock__shackle { fill: none; stroke: var(--paper); stroke-width: 8; stroke-linecap: round; transform-origin: 60px 46px; transition: transform .5s var(--ease); }
+.lock__body { fill: var(--ink); stroke: var(--paper); stroke-width: 3; }
+.lock__semi { fill: var(--lime); }
+.lock:hover .lock__shackle { transform: translateY(-3px); }
+.lock.is-open .lock__shackle { transform: translateY(-16px) rotate(-28deg); }
+
+/* =========================================================
+   REDES — la trama de círculos dibujada + el chico sobre la ciudad
+   ========================================================= */
+.redes__band {
+  position: absolute; left: -2vw; right: -2vw; top: 30vh; height: 34vh;
+  background: var(--ink); z-index: 1; overflow: hidden;
+}
+.redes__circles { position: absolute; inset: 0; width: 100%; height: 100%; }
+.redes__circles circle { transform-box: fill-box; transform-origin: center; }
+.redes__art { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.redes__city { right: -3vw; top: 12vh; width: 50vw; z-index: 0; }
+.redes__boy { right: 9vw; top: calc(30vh - 29vh); height: 31vh; z-index: 2; position: absolute; }
+.redes__art { z-index: auto; }
+.redes__boy { z-index: 2; }
+@media (max-width: 860px) {
+  .redes__band { top: 26vh; height: 26vh; }
+  .redes__city { width: 110vw; right: -30vw; top: 12vh; }
+  .redes__boy { height: 18vh; top: calc(26vh - 17vh); right: 4vw; }
 }

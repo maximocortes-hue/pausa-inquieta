@@ -63,8 +63,8 @@ export default function somos(lenis) {
 
   // Collage: se mueve con el progreso
   gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: 'bottom bottom', scrub: 1 } })
-    .to('.somos__ph1', { yPercent: -12, ease: 'none' }, 0)
-    .to('.somos__ph2', { yPercent: 40, rotate: -4, ease: 'none' }, 0)
+    .to('.somos__city', { yPercent: 8, ease: 'none' }, 0)
+    .to('.somos__girl', { y: -24, ease: 'none' }, 0)
     .to('.somos__c1', { xPercent: -20, yPercent: 30, ease: 'none' }, 0)
     .to('.somos__semi', { rotate: 180, xPercent: -60, ease: 'none' }, 0);
 
