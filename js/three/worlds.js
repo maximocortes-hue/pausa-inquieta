@@ -92,7 +92,7 @@ const hex = (n) => '#' + n.toString(16).padStart(6, '0');
 // medio de cada una y un cubo en el centro. El cubo va solo a un hueco:
 // los demás desaparecen y suena el tic tac.
 // =========================================================
-export function createCubos(canvas, { onPlace } = {}) {
+export function createCubos(canvas, { onPlace, onLand } = {}) {
   const W = makeWorld(canvas, { fov: 55, bg: 0x0d0a1c, fog: [10, 26] });
   const { scene, camera, add } = W;
   scene.add(new THREE.HemisphereLight(0xffffff, 0x221a44, 0.55));
@@ -130,7 +130,7 @@ export function createCubos(canvas, { onPlace } = {}) {
   // el cubo del centro
   const cube = add(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshStandardMaterial({ color: LIME, emissive: LIME, emissiveIntensity: 0.9, toneMapped: false }), 0, 1.3, 0);
   const cubeGlow = glowSprite('215,255,58', 3, 0.6); cube.add(cubeGlow);
-  let placed = false;
+  let placed = false, landed = false;
   const lightCols = [VIOLET, BLUE, LIME, RED];
   W.onFrame((t, dt, p) => {
     // luces del techo y piso que cambian
@@ -138,11 +138,17 @@ export function createCubos(canvas, { onPlace } = {}) {
     top.color.lerp(new THREE.Color(lightCols[ci]), 0.03);
     bottom.color.copy(top.color);
     ceilMat.emissive.copy(top.color); floorMat.emissive.copy(top.color);
+    // venís cayendo desde el salón: atravesás el techo y aterrizás en la planta baja
+    const land = seg(p, 0, 0.16);
+    const fallY = lerp(14, 2.1, 1 - Math.pow(1 - land, 2.2));
+    if (land >= 1 && !landed) { landed = true; onLand && onLand(); }
+    if (p < 0.1) landed = false;
+    const bump = landed ? Math.max(0, 1 - (p - 0.16) * 30) : 0;
     // cámara que gira alrededor
-    const a = lerp(1.25, 0.12, ease(seg(p, 0, 0.6))) + W.mouse.x * 0.3;
+    const a = lerp(1.25, 0.12, ease(seg(p, 0.16, 0.6))) + W.mouse.x * 0.3;
     const rad = W.portrait ? 3.9 : 3.4;
-    camera.position.set(Math.sin(a) * rad, 2.1 + W.mouse.y * -0.3, Math.cos(a) * rad);
-    camera.lookAt(0, 1.6, 0);
+    camera.position.set(Math.sin(a) * rad, fallY - bump * 0.35 + W.mouse.y * -0.3 * land, Math.cos(a) * rad);
+    camera.lookAt(0, lerp(-3, 1.6, ease(land)), 0);
     // el cubo va al hueco de la pared 0 (z = -R)
     const go = ease(seg(p, 0.5, 0.68));
     cube.position.set(0, lerp(1.3 + Math.sin(t * 1.5) * 0.08, H / 2, go), lerp(0, -R + 0.35, go));
@@ -330,7 +336,7 @@ export function createHoods(canvas, { phrase, onStep } = {}) {
 // Se escribe solo: las teclas se hunden, se forma una palabra y la palabra se
 // vuelve física y sale flotando por el espacio.
 // =========================================================
-export function createLetras(canvas, { words, onKey } = {}) {
+export function createLetras(canvas, { words, onKey, onWord } = {}) {
   const W = makeWorld(canvas, { fov: 50, bg: 0x0b0b0b, fog: [9, 24] });
   const { scene, camera, add } = W;
   scene.add(new THREE.HemisphereLight(0xb9a3ff, 0x050308, 0.7));
@@ -399,6 +405,7 @@ export function createLetras(canvas, { words, onKey } = {}) {
         s.userData.spin = rand(-0.3, 0.3);
         scene.add(s); floating.push(s);
         if (floating.length > 10) scene.remove(floating.shift());
+        onWord && onWord(w);
         shown = ''; redrawTyping();
         wi++; ci = 0; nextKey = 0.9;
       }
@@ -523,6 +530,376 @@ export function createFinal(canvas) {
     camera.position.set(W.mouse.x * 0.4 + Math.sin(t * 0.7) * 0.05, lerp(1.8, 1.6, travel), cz + (W.portrait ? 1.5 : 0));
     camera.lookAt(0, lerp(1.8, 1.1, seg(p, 0.75, 0.9)), cz - 4);
     box.group.rotation.y = t * 0.15;
+  });
+  return W.api;
+}
+
+// =========================================================
+// 03 · EL CORAZÓN — cinemática (como en Unreal): planos con cortes y cámara
+// en movimiento. El semicírculo late en flúor, pierde el color, aparece
+// Inquieta en blanco y negro con ruido, saltan formas bruscas y al final
+// el semicírculo se llena de ruido.
+// =========================================================
+export function createCorazon(canvas, { onCut } = {}) {
+  const W = makeWorld(canvas, { fov: 38, bg: 0x140c33, fog: [7, 26], portraitFov: 60 });
+  const { scene, camera, add } = W;
+  const hemi = new THREE.HemisphereLight(0x7b63d6, 0x05030d, 0.7); scene.add(hemi);
+  const violet = new THREE.PointLight(VIOLET, 40, 22, 1.5); violet.position.set(-3, 3.5, 1); scene.add(violet);
+  const blue = new THREE.PointLight(BLUE, 40, 26, 1.5); blue.position.set(3, 3.5, -5); scene.add(blue);
+  // el salón: piso, columnas a los lados
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x24184f, roughness: 0.35, metalness: 0.35 });
+  const fl = add(new THREE.PlaneGeometry(40, 40), floorMat); fl.rotation.x = -Math.PI / 2;
+  const colMat = new THREE.MeshStandardMaterial({ color: 0xb6a9e8, roughness: 0.85 });
+  for (let i = 0; i < 7; i++) [-3.4, 3.4].forEach((x) => add(new THREE.CylinderGeometry(0.24, 0.28, 4.4, 16), colMat, x, 2.2, 4 - i * 3.4));
+  // el semicírculo: mitad Pausa (flúor) y mitad Inquieta (ruido)
+  const R = 1.3, CY = 1.9;
+  const pc = document.createElement('canvas'); pc.width = 96; pc.height = 192;
+  const px = pc.getContext('2d');
+  const pTex = new THREE.CanvasTexture(pc); pTex.magFilter = THREE.NearestFilter; pTex.colorSpace = THREE.SRGBColorSpace;
+  const pausa = add(new THREE.CircleGeometry(R, 64, Math.PI / 2, Math.PI), new THREE.MeshBasicMaterial({ map: pTex, toneMapped: false }), -0.03, CY, 0);
+  const nTex = noiseCanvasTex(64, 128);
+  const inqMat = new THREE.MeshBasicMaterial({ map: nTex, transparent: true, opacity: 0, toneMapped: false });
+  const inq = add(new THREE.CircleGeometry(R, 64, -Math.PI / 2, Math.PI), inqMat, 0.03, CY, 0);
+  const glow = glowSprite('215,255,58', 7, 0.8); glow.position.set(-0.4, CY, -0.2); scene.add(glow);
+  // formas bruscas en blanco y negro
+  const shards = [];
+  for (let i = 0; i < 46; i++) {
+    const g = i % 3 ? new THREE.TetrahedronGeometry(rand(0.08, 0.28)) : new THREE.BoxGeometry(rand(0.05, 0.4), rand(0.02, 0.08), rand(0.05, 0.3));
+    const m = add(g, new THREE.MeshBasicMaterial({ color: [0xffffff, 0x111111, 0x8a8a8a][i % 3] }), 0, CY, 0);
+    const d = new THREE.Vector3(rand(-1, 1), rand(-0.6, 1), rand(-0.3, 1)).normalize();
+    m.userData = { d, dist: rand(1.6, 4.5), spin: new THREE.Vector3(rand(-6, 6), rand(-6, 6), rand(-6, 6)), at: rand(0, 0.1) };
+    m.visible = false;
+    shards.push(m);
+  }
+  // planos de la cinemática (cortes secos entre uno y otro)
+  const SHOTS = [0, 0.2, 0.4, 0.6, 0.82, 1.0001];
+  let shot = -1;
+  const lime = new THREE.Color(LIME), gray = new THREE.Color(0x9a9a9a), tmp = new THREE.Color();
+  const bgA = new THREE.Color(0x140c33), bgB = new THREE.Color(0x0e0e0e);
+  const img = px.createImageData(96, 192);
+  W.onFrame((t, dt, p) => {
+    const s = Math.max(0, SHOTS.findIndex((v, i) => p >= v && p < SHOTS[i + 1]));
+    if (s !== shot) { if (shot !== -1) onCut && onCut(s); shot = s; }
+    const lt = seg(p, SHOTS[s], SHOTS[s + 1]); // tiempo dentro del plano
+    const drain = seg(p, 0.2, 0.55);          // pierde el color
+    const appear = seg(p, 0.3, 0.55);         // aparece Inquieta
+    const fill = seg(p, 0.62, 0.95);          // la mitad Pausa se llena de ruido
+    const burst = seg(p, 0.42, 0.62);
+    // latido, cada vez más brusco
+    const rate = 1.05 - drain * 0.45;
+    const ph = (t % rate) / rate;
+    const kick = ph < 0.12 ? Math.sin((ph / 0.12) * Math.PI) : ph > 0.2 && ph < 0.3 ? 0.6 * Math.sin(((ph - 0.2) / 0.1) * Math.PI) : 0;
+    const sc = 1 + kick * (0.05 + drain * 0.08);
+    pausa.scale.setScalar(sc); inq.scale.setScalar(sc);
+    // la mitad Pausa: flúor que se apaga y se llena de ruido
+    tmp.copy(lime).lerp(gray, drain);
+    const r = tmp.r * 255, g = tmp.g * 255, b = tmp.b * 255;
+    const dd = img.data;
+    for (let i = 0; i < dd.length; i += 4) {
+      if (Math.random() < fill) { const v = Math.random() * 255; dd[i] = dd[i + 1] = dd[i + 2] = v; }
+      else { const k = 1 - Math.random() * 0.12 * drain; dd[i] = r * k; dd[i + 1] = g * k; dd[i + 2] = b * k; }
+      dd[i + 3] = 255;
+    }
+    px.putImageData(img, 0, 0); pTex.needsUpdate = true;
+    nTex.update();
+    inqMat.opacity = appear * (Math.random() < 0.08 * appear ? 0.3 : 1);
+    glow.material.opacity = (0.75 + kick * 0.25) * (1 - drain * 0.9);
+    // el lugar también pierde el color
+    scene.background.copy(bgA).lerp(bgB, drain); scene.fog.color.copy(scene.background);
+    violet.intensity = 40 * (1 - drain) + (Math.random() < drain * 0.15 ? 60 : 0);
+    blue.intensity = 40 * (1 - drain * 0.8);
+    hemi.intensity = 0.7 - drain * 0.35;
+    // formas bruscas
+    shards.forEach((m) => {
+      const u = m.userData;
+      const k = seg(burst, u.at, u.at + 0.4);
+      m.visible = k > 0;
+      if (!m.visible) return;
+      const out = 1 - Math.pow(1 - k, 3);
+      m.position.set(u.d.x * u.dist * out, CY + u.d.y * u.dist * out * 0.7, u.d.z * u.dist * out);
+      m.rotation.set(u.spin.x * t * 0.2, u.spin.y * t * 0.2, u.spin.z * t * 0.2);
+    });
+    // cámara: cada plano tiene su movimiento
+    const shake = (a) => (Math.random() - 0.5) * a;
+    const at = new THREE.Vector3(0, CY, 0);
+    let pos, roll = 0;
+    if (s === 0) { // plano general: travelling lento hacia el corazón
+      pos = new THREE.Vector3(lerp(0.6, 0, lt), lerp(1.2, 1.6, lt), lerp(13, 8, ease(lt)));
+    } else if (s === 1) { // primer plano: gira alrededor del borde del semicírculo
+      const a = lerp(-0.9, 0.5, lt);
+      pos = new THREE.Vector3(Math.sin(a) * 3.2, CY + 0.3, Math.cos(a) * 3.2);
+      at.set(lerp(-0.6, 0.4, lt), CY, 0);
+    } else if (s === 2) { // cámara en mano, inclinada: las formas salen hacia vos
+      pos = new THREE.Vector3(1.4 + shake(0.12), CY - 0.6 + shake(0.12), 4.2 - lt * 0.8);
+      roll = 0.22 + shake(0.05);
+    } else if (s === 3) { // contrapicado que se acerca lento: la mitad flúor se llena de ruido
+      pos = new THREE.Vector3(-0.4 + shake(0.03), lerp(0.6, 0.9, lt), lerp(5.5, 3.2, ease(lt)));
+      at.set(-0.3, CY + 0.2, 0);
+    } else { // plano final: se aleja, todo ya es ruido
+      pos = new THREE.Vector3(shake(0.04), lerp(1.7, 2.4, lt), lerp(3.5, 11, ease(lt)));
+    }
+    if (W.portrait) pos.sub(at).multiplyScalar(1.35).add(at);
+    camera.position.copy(pos);
+    camera.up.set(Math.sin(roll), Math.cos(roll), 0);
+    camera.lookAt(at);
+  });
+  return W.api;
+}
+
+// =========================================================
+// 05 · EL PASILLO — cuadros colgados en la pared, varios torcidos, y en el piso
+// solo el marco. La cámara camina el pasillo. Nada se acomoda: los cuadros se
+// tuercen más y alguno se cae. No se toca nada, solo se ve.
+// =========================================================
+export function createCuadros(canvas, { onTilt, onFall } = {}) {
+  const W = makeWorld(canvas, { fov: 55, bg: 0x0d0b1a, fog: [6, 24] });
+  const { scene, camera, add } = W;
+  scene.add(new THREE.HemisphereLight(0xcfc6ff, 0x08060f, 0.8));
+  const L = 28, HW = 1.7, H = 3.4, Z0 = 3;
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xe9e6dd, roughness: 0.95 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a2440, roughness: 0.6, metalness: 0.1 });
+  const ceilMat = new THREE.MeshStandardMaterial({ color: 0x1a1530 });
+  const fl = add(new THREE.PlaneGeometry(HW * 2, L), floorMat, 0, 0, Z0 - L / 2); fl.rotation.x = -Math.PI / 2;
+  const ce = add(new THREE.PlaneGeometry(HW * 2, L), ceilMat, 0, H, Z0 - L / 2); ce.rotation.x = Math.PI / 2;
+  [-1, 1].forEach((sd) => { const w = add(new THREE.PlaneGeometry(L, H), wallMat, sd * HW, H / 2, Z0 - L / 2); w.rotation.y = -sd * Math.PI / 2; });
+  // luces del techo, en fila
+  const lamps = [];
+  for (let i = 0; i < 6; i++) {
+    const z = 1 - i * 4.2;
+    const l = new THREE.PointLight(0xfff3e0, 9, 7, 1.6); l.position.set(0, H - 0.3, z); scene.add(l); lamps.push(l);
+    add(new THREE.BoxGeometry(0.6, 0.04, 0.18), new THREE.MeshBasicMaterial({ color: 0xfff6e6 }), 0, H - 0.02, z);
+  }
+  // las imágenes de la marca, recortadas como en los cuadros de antes
+  const loader = new THREE.TextureLoader();
+  const imgs = {
+    a: { tex: loader.load('assets/img/brand-a.webp'), w: 2000, h: 1074 },
+    b: { tex: loader.load('assets/img/brand-b.webp'), w: 2000, h: 1417 },
+  };
+  Object.values(imgs).forEach((im) => { im.tex.colorSpace = THREE.SRGBColorSpace; });
+  const CROPS = [['a', 300, 690, 400, 384], ['b', 150, 280, 520, 820], ['a', 1210, 672, 210, 330], ['a', 1417, 731, 289, 343], ['a', 1716, 819, 191, 189], ['a', 1680, 680, 190, 170]];
+  function cropTex([k, x, y, w, h]) {
+    const im = imgs[k];
+    const t = im.tex.clone();
+    t.repeat.set(w / im.w, h / im.h);
+    t.offset.set(x / im.w, 1 - (y + h) / im.h);
+    t.needsUpdate = true;
+    return t;
+  }
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x1b1b1b, roughness: 0.5 });
+  const gold = new THREE.MeshStandardMaterial({ color: 0xb9a36a, roughness: 0.4, metalness: 0.6 });
+  function frame(w, h, crop) {
+    const g = new THREE.Group();
+    const b = 0.07, mat = Math.random() < 0.5 ? frameMat : gold;
+    [[0, h / 2, w + b * 2, b], [0, -h / 2, w + b * 2, b], [-w / 2, 0, b, h], [w / 2, 0, b, h]].forEach(([x, y, ww, hh]) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(ww, hh, 0.06), mat); m.position.set(x, y, 0); g.add(m);
+    });
+    if (crop) {
+      const pic = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: cropTex(crop), roughness: 0.8 }));
+      pic.position.z = -0.005; g.add(pic);
+    }
+    return g;
+  }
+  // cuadros colgados (de un clavo arriba: giran desde ahí)
+  const hung = [];
+  for (let i = 0; i < 12; i++) {
+    const sd = i % 2 ? 1 : -1;
+    const crop = CROPS[i % CROPS.length];
+    const ar = crop[3] / crop[4];
+    const h = rand(0.7, 1.05), w = Math.min(1.5, h * ar);
+    const pivot = new THREE.Group();
+    const z = 0.2 - Math.floor(i / 2) * 2.1 - (sd > 0 ? 1 : 0);
+    pivot.position.set(sd * (HW - 0.04), 2.45, z);
+    pivot.rotation.y = -sd * Math.PI / 2;
+    scene.add(pivot);
+    const f = frame(w, h, crop); f.position.y = -h / 2 - 0.05; pivot.add(f);
+    const base = i % 3 === 0 ? 0 : rand(-0.35, 0.35); // varios ya están torcidos
+    pivot.rotation.z = base;
+    hung.push({ pivot, f, base, h, z, tw: rand(0.18, 0.45) * (Math.random() < 0.5 ? -1 : 1), fall: i === 5 || i === 8, done: false, tilted: false, vy: 0 });
+  }
+  // en el piso, solo el marco
+  for (let i = 0; i < 5; i++) {
+    const sd = i % 2 ? 1 : -1;
+    const f = frame(rand(0.6, 1.2), rand(0.5, 0.9), null);
+    f.rotation.set(-Math.PI / 2, 0, rand(-0.6, 0.6));
+    f.position.set(sd * rand(0.6, 1.1), 0.04, -1 - i * 4.4);
+    scene.add(f);
+  }
+  W.onFrame((t, dt, p) => {
+    const camZ = lerp(3, -18, ease(p));
+    // la cámara camina y mira a un lado y al otro
+    const lookSide = Math.sin(p * Math.PI * 3) * 0.55 + W.mouse.x * 0.3;
+    camera.position.set(Math.sin(p * 9) * 0.06, 1.62 + Math.abs(Math.sin(p * 40)) * 0.03, camZ);
+    camera.lookAt(camera.position.x + Math.sin(lookSide) * 2, 1.7 - W.mouse.y * 0.3, camZ - Math.cos(lookSide) * 2);
+    lamps.forEach((l, i) => { l.intensity = Math.random() < 0.015 * (i % 3) ? 2 : 9; });
+    hung.forEach((c) => {
+      // cuando te acercás, se tuercen más (nada se acomoda)
+      const near = c.z > camZ - 3.2 && c.z < camZ + 2;
+      if (near && !c.tilted) { c.tilted = true; onTilt && onTilt(); }
+      if (c.z < camZ - 6) c.tilted = false;
+      const target = c.base + (c.tilted ? c.tw : 0) + Math.sin(t * 2 + c.z) * 0.01;
+      c.pivot.rotation.z += (target - c.pivot.rotation.z) * 0.06;
+      if (c.fall) {
+        if (c.z > camZ - 2.4) {
+          // se descuelga y cae al piso
+          if (!c.done) { c.done = true; c.vy = 0; setTimeout(() => onFall && onFall(), 450); }
+          c.vy -= dt * 9;
+          c.f.position.y = Math.max(-2.45 + c.h / 2 + 0.02, c.f.position.y + c.vy * dt);
+          c.f.rotation.x = Math.min(0.28, c.f.rotation.x + dt * 0.5);
+        } else if (c.done) { c.done = false; c.vy = 0; c.f.position.y = -c.h / 2 - 0.05; c.f.rotation.x = 0; }
+      }
+    });
+  });
+  return W.api;
+}
+
+// =========================================================
+// 06 · LOS DOMINÓS — la primera pieza está de cara al piso, se posiciona sola
+// y empieza la cadena. La cámara va arrasando con cada dominó y al final la
+// vemos desde arriba: lo que cayó forma la frase.
+// =========================================================
+const PIX = {
+  T: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+  E: ['#####', '#....', '#....', '####.', '#....', '#....', '#####'],
+  D: ['####.', '#...#', '#...#', '#...#', '#...#', '#...#', '####.'],
+  I: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '#####'],
+  J: ['#####', '...#.', '...#.', '...#.', '...#.', '#..#.', '.##..'],
+  Q: ['.###.', '#...#', '#...#', '#...#', '#.#.#', '#..#.', '.##.#'],
+  U: ['#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+  N: ['#...#', '##..#', '#.#.#', '#.#.#', '#..##', '#...#', '#...#'],
+  O: ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+  H: ['#...#', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+  G: ['.###.', '#...#', '#....', '#.###', '#...#', '#...#', '.###.'],
+  S: ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+};
+export function createDominos(canvas, { phrase = 'Te dije que no hagas nada', onFall } = {}) {
+  const W = makeWorld(canvas, { fov: 50, bg: 0x0c0a16, fog: [16, 90] });
+  const { scene, camera } = W;
+  scene.add(new THREE.HemisphereLight(0xe8e4ff, 0x120e22, 1.0));
+  const key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(-6, 12, 8); scene.add(key);
+  const C = 0.3, TH = 0.07, HH = 0.36, WD = 0.24;
+  // líneas de la frase (en pantallas verticales, más cortas)
+  const words = phrase.toUpperCase().split(' ');
+  const lines = W.portrait
+    ? [words.slice(0, 2).join(' '), words.slice(2, 4).join(' '), words[4], words[5]].filter(Boolean)
+    : [words.slice(0, 3).join(' '), words.slice(3).join(' ')];
+  const colsOf = (s) => [...s].reduce((n, ch) => n + (ch === ' ' ? 3 : 6), 0) - 1;
+  const maxCols = Math.max(...lines.map(colsOf));
+  const XL = -C * 2, XR = (maxCols + 1) * C;
+  const LINE_GAP = 10; // filas entre una línea y la otra
+  const doms = []; // { x, z, dir, d, letter }
+  let d0 = 0;
+  lines.forEach((line, li) => {
+    const z0 = li * LINE_GAP * C;           // fila 0 de esta línea
+    const zm = z0 + 3 * C;                  // fila del medio (por donde va la cadena)
+    const fwd = li % 2 === 0;               // ida y vuelta, como una serpiente
+    const xs = fwd ? XL : XR, xe = fwd ? XR : XL;
+    const dir = fwd ? 'px' : 'nx';
+    const along = (x) => d0 + Math.abs(x - xs);
+    let col = 0, minX = Infinity, maxX = -Infinity;
+    [...line].forEach((ch) => {
+      if (ch === ' ') { col += 3; return; }
+      const g = PIX[ch];
+      if (!g) { col += 6; return; }
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 5; c++) {
+        if (g[r][c] !== '#') continue;
+        const x = (col + c) * C, z = z0 + r * C;
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        doms.push({ x, z, dir, d: along(x) + Math.abs(r - 3) * 0.05, letter: true });
+      }
+      col += 6;
+    });
+    // camino de entrada y de salida (fuera de las letras)
+    for (let x = XL; x <= XR + 0.001; x += C) {
+      if (x > minX - C * 0.5 && x < maxX + C * 0.5) continue;
+      doms.push({ x, z: zm, dir, d: along(x), letter: false });
+    }
+    d0 += XR - XL;
+    // de una línea a la otra
+    if (li < lines.length - 1) {
+      const zn = (li + 1) * LINE_GAP * C + 3 * C;
+      for (let z = zm + C; z < zn - 0.001; z += C) doms.push({ x: xe, z, dir: 'pz', d: d0 + (z - zm), letter: false });
+      d0 += zn - zm;
+    }
+  });
+  const D = d0;
+  // la primera pieza, de cara al piso
+  const first = { x: XL - C, z: 3 * C, dir: 'px', d: -1, letter: false, first: true };
+  doms.push(first);
+  // el camino según la distancia (para que la cámara lo siga)
+  function pathAt(d) {
+    let acc = 0;
+    for (let li = 0; li < lines.length; li++) {
+      const zm = li * LINE_GAP * C + 3 * C, fwd = li % 2 === 0;
+      const len = XR - XL;
+      if (d <= acc + len || li === lines.length - 1) {
+        const k = clamp(d - acc, 0, len);
+        return { x: fwd ? XL + k : XR - k, z: zm, dx: fwd ? 1 : -1, dz: 0 };
+      }
+      acc += len;
+      const zn = (li + 1) * LINE_GAP * C + 3 * C;
+      if (d <= acc + (zn - zm)) return { x: fwd ? XR : XL, z: zm + (d - acc), dx: 0, dz: 1 };
+      acc += zn - zm;
+    }
+    return { x: XL, z: 0, dx: 1, dz: 0 };
+  }
+  const cx = (XL + XR) / 2, depth = (lines.length - 1) * LINE_GAP * C + 7 * C, cz = depth / 2;
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(160, 160), new THREE.MeshStandardMaterial({ color: 0x17132a, roughness: 0.9 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.set(cx, 0, cz); scene.add(floor);
+  // los dominós: una sola malla con muchas copias
+  const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(TH, HH, WD), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45 }), doms.length);
+  scene.add(inst);
+  const PAPER_C = new THREE.Color(PAPER), LIME_C = new THREE.Color(LIME), PATH_C = new THREE.Color(0x4b4568), col = new THREE.Color();
+  const M = new THREE.Matrix4(), T1 = new THREE.Matrix4(), RF = new THREE.Matrix4(), RY = new THREE.Matrix4(), T2 = new THREE.Matrix4();
+  T2.makeTranslation(-TH / 2, HH / 2, 0);
+  const YAW = { px: 0, nx: Math.PI, pz: -Math.PI / 2 };
+  const DV = { px: [1, 0], nx: [-1, 0], pz: [0, 1] };
+  doms.forEach((dm, i) => { dm.a = -1; dm.down = false; inst.setColorAt(i, PAPER_C); });
+  const front = { x: first.x, z: first.z };
+  const camP = new THREE.Vector3(first.x - 1.5, 0.75, first.z + 2), camL = new THREE.Vector3(first.x, 0.12, first.z);
+  const v = new THREE.Vector3(), w2 = new THREE.Vector3(), upV = new THREE.Vector3(), down = new THREE.Vector3(0, 0, -1);
+  W.onFrame((t, dt, p) => {
+    const f = D * seg(p, 0.13, 0.8); // por dónde va la cadena
+    let changed = false;
+    doms.forEach((dm, i) => {
+      let a;
+      if (dm.first) {
+        // de cara al piso → se para sola → cae y arranca la cadena
+        a = lerp(Math.PI / 2 - 0.04, 0, ease(seg(p, 0.02, 0.08))) + ease(seg(p, 0.1, 0.13)) * (Math.PI / 2 - 0.04);
+      } else a = ease(clamp((f - dm.d) / 0.5)) * (Math.PI / 2 - 0.04);
+      if (Math.abs(a - dm.a) < 1e-4) return;
+      dm.a = a; changed = true;
+      const [dx, dz] = DV[dm.dir];
+      T1.makeTranslation(dm.x + dx * TH / 2, 0, dm.z + dz * TH / 2);
+      if (dm.dir === 'px') RF.makeRotationZ(-a); else if (dm.dir === 'nx') RF.makeRotationZ(a); else RF.makeRotationX(a);
+      RY.makeRotationY(YAW[dm.dir]);
+      M.copy(T1).multiply(RF).multiply(RY).multiply(T2);
+      inst.setMatrixAt(i, M);
+      const k = a / (Math.PI / 2);
+      col.copy(PAPER_C).lerp(dm.letter ? LIME_C : PATH_C, dm.first ? 0 : (k > 0.85 ? 1 : k * 0.4));
+      inst.setColorAt(i, col);
+      const isDown = k > 0.6 && !dm.first;
+      if (isDown && !dm.down) onFall && onFall();
+      dm.down = isDown;
+    });
+    if (changed) { inst.instanceMatrix.needsUpdate = true; if (inst.instanceColor) inst.instanceColor.needsUpdate = true; }
+    // cámara: bajita, pegada al frente de la cadena
+    const pt = p < 0.13 ? { x: first.x + 0.3, z: first.z, dx: 1, dz: 0 } : pathAt(f);
+    front.x += (pt.x - front.x) * 0.12; front.z += (pt.z - front.z) * 0.12;
+    const sideX = pt.dz ? -1.7 : -pt.dx * 1.4, sideZ = pt.dz ? -0.4 : 1.9;
+    v.set(front.x + sideX, 0.7, front.z + sideZ);
+    camP.lerp(v, 0.06);
+    w2.set(front.x + pt.dx * 0.9, 0.12, front.z + pt.dz * 0.9);
+    camL.lerp(w2, 0.1);
+    // al final sube hasta verla desde arriba
+    const top = ease(seg(p, 0.8, 0.97));
+    const vfov = (camera.fov * Math.PI) / 180;
+    const spanX = (XR - XL) / 2 + 1.4, spanZ = depth / 2 + 1.4;
+    const hTop = Math.max(spanX / (Math.tan(vfov / 2) * camera.aspect), spanZ / Math.tan(vfov / 2));
+    camera.position.set(lerp(camP.x, cx, top), lerp(camP.y, hTop, top), lerp(camP.z, cz + 0.001, top));
+    upV.set(0, 1, 0).lerp(down, top).normalize();
+    camera.up.copy(upV);
+    camera.lookAt(lerp(camL.x, cx, top), lerp(camL.y, 0, top), lerp(camL.z, cz, top));
   });
   return W.api;
 }

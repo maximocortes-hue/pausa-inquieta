@@ -242,3 +242,59 @@ body.rec .pi { left: var(--gutter); top: 50%; bottom: auto; margin-top: -32px; }
 
 /* Frente a la puerta, el cursor es una linterna UV */
 html.uv-lens .cursor-ring { width: 120px; height: 120px; margin: -60px 0 0 -60px; border-color: #c7a8ff; box-shadow: 0 0 40px rgba(164,124,255,.6), inset 0 0 30px rgba(164,124,255,.35); mix-blend-mode: normal; }
+
+/* Volumen de PI dentro del narrador */
+.narr .pi-vol { margin-top: 12px; padding: 4px 10px 4px 4px; gap: 8px; }
+.narr .pi-vol__btn { width: 24px; height: 24px; }
+.narr .pi-vol__btn svg { width: 14px; height: 14px; }
+.narr .pi-vol__range { width: 90px; }
+@media (max-width: 860px) { .narr .pi-vol { margin-top: 8px; } }
+
+/* ---------- Etapa 03: seguís cayendo (continúa la caída del salón) ---------- */
+.etapa--fall .etapa__stage {
+  background: radial-gradient(ellipse 60% 45% at 50% calc(115% - var(--fall, 0) * 60%), rgba(215,255,58,.35), transparent 70%), #140c33;
+  color: var(--paper);
+}
+.etapa--fall .etapa__num { -webkit-text-stroke-color: var(--lime); }
+.fall { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fall i { position: absolute; top: 0; width: 2px; border-radius: 2px; opacity: .7; will-change: transform; }
+.etapa--fall .etapa__num, .etapa--fall .etapa__title { position: relative; z-index: 1; }
+
+/* Primer título: aparece de entrada, con una flecha que indica bajar */
+.etapa__down {
+  position: absolute; left: 50%; bottom: 6vh; width: 26px; height: 44px; margin-left: -13px;
+  border: 1.5px solid currentColor; border-radius: 999px; opacity: .8;
+}
+.etapa__down::after {
+  content: ""; position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px;
+  border-radius: 4px; background: var(--lime); animation: etDown 1.4s ease-in-out infinite;
+}
+@keyframes etDown { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(16px); opacity: 0; } 100% { opacity: 0; } }
+
+/* Cambio de sala: un corte con el nombre del lugar */
+.cut {
+  position: fixed; inset: 0; z-index: 140; pointer-events: none; visibility: hidden;
+  display: grid; place-items: center; align-content: center; gap: 10px; text-align: center;
+  background: var(--ink); color: var(--paper);
+}
+.cut__kind { font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: var(--lime); }
+.cut__name { font-family: var(--f-logo); font-weight: 300; font-size: clamp(30px, 4.6vw, 72px); letter-spacing: -.03em; line-height: 1; }
+.cut__bar { width: min(260px, 50vw); height: 2px; background: rgba(236,235,229,.2); overflow: hidden; }
+.cut__bar i { display: block; height: 100%; background: var(--lime); transform-origin: 0 50%; }
+.cut--aula { background: var(--paper) url("../assets/img/paper.svg") 0 0 / 640px; color: var(--ink); }
+.cut--aula .cut__kind { color: var(--violet); }
+
+/* Cinemática (corazón): bandas negras de cine */
+.cine-bars::before, .cine-bars::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 11vh; background: #000; z-index: 5; pointer-events: none;
+}
+.cine-bars::before { top: 0; }
+.cine-bars::after { bottom: 0; }
+
+/* Palabras que salieron de la pared y te persiguen */
+.floaters { position: fixed; inset: 0; z-index: 160; pointer-events: none; overflow: hidden; }
+.chaser {
+  position: absolute; left: 0; top: 0; white-space: nowrap;
+  font-family: var(--f-logo); font-weight: 800; letter-spacing: -.02em;
+  color: var(--paper); mix-blend-mode: difference; will-change: transform;
+}

@@ -2,7 +2,7 @@
 // un salón antiguo de columnas y barandas ornamentadas, luz violeta y azul con
 // destellos de color, y en el medio el semicírculo flúor, gastado, que late.
 // Al final el piso se abre (de verdad: las dos mitades se van para abajo) y caés.
-// Esa caída se repite en un loop corto mientras leés.
+// La caída sigue al scroll y continúa en la etapa 03 hasta la planta baja.
 import * as THREE from 'three';
 
 const LIME = 0xd7ff3a;
@@ -138,8 +138,7 @@ export function createSalon(canvas, { onFloor } = {}) {
   const look = { x: 0, y: 0, tx: 0, ty: 0 };
   window.addEventListener('pointermove', (e) => { look.tx = e.clientX / innerWidth - 0.5; look.ty = e.clientY / innerHeight - 0.5; });
 
-  let p = 0, target = 0, loopT = 0, opened = false;
-  let fade = 0; // 0..1: negro al reiniciar el loop
+  let p = 0, target = 0, opened = false;
   function apply(time, dt) {
     p += (target - p) * 0.08;
     look.x += (look.tx - look.x) * 0.04; look.y += (look.ty - look.y) * 0.04;
@@ -160,28 +159,24 @@ export function createSalon(canvas, { onFloor } = {}) {
     let cx = look.x * 0.4, cy = lerp(1.7, 1.75, walk), cz = lerp(6.5, -1.5, walk);
     let pitch = -look.y * 0.12;
     let openK = 0;
-    fade = 0;
 
-    // El piso se abre: primero con el scroll y después en loop
-    if (p > 0.66) {
-      loopT += dt;
-      const T = 3.8;
-      const t = loopT % T;
-      openK = ease(clamp(t / 0.8));
-      const fall = clamp((t - 0.55) / 1.3);
-      cy -= fall * fall * 9;
-      pitch -= fall * 0.9;
-      cx += (Math.random() - 0.5) * 0.08 * fall;
-      fade = clamp((t - 1.6) / 0.5) * (1 - clamp((t - 3.1) / 0.5));
-      if (t > 3.1) { openK = 1 - ease(clamp((t - 3.1) / 0.6)); cy = 1.75; pitch = 0; }
-      if (t < dt * 1.5 || (!opened)) { opened = true; onFloor && onFloor(); }
-    } else { loopT = 0; opened = false; }
+    // El piso se abre y caés: todo con el scroll (si dejás de scrollear, quedás
+    // suspendido en la caída; seguir bajando es seguir cayendo)
+    if (p > 0.64) {
+      openK = ease(seg(p, 0.64, 0.74));
+      const fall = seg(p, 0.7, 1);
+      cy -= fall * fall * 16;
+      pitch -= ease(seg(p, 0.7, 0.86)) * 1.25;
+      cx += (Math.random() - 0.5) * 0.06 * fall;
+      if (!opened) { opened = true; onFloor && onFloor(); }
+    } else opened = false;
+    voidGlow.scale.setScalar(14 + seg(p, 0.75, 1) * 26);
     leftP.rotation.z = -openK * 1.45;
     rightP.rotation.z = openK * 1.45;
 
     camera.position.set(cx, cy, cz);
     camera.rotation.set(pitch, -look.x * 0.15, 0);
-    renderer.toneMappingExposure = 1.1 * (1 - fade);
+    renderer.toneMappingExposure = 1.1;
   }
 
   let raf = 0;

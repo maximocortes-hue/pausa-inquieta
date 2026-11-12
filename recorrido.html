@@ -56,11 +56,12 @@
   <div class="hostile" aria-hidden="true"></div>
   <div class="floaters" aria-hidden="true"></div>
   <div class="bw" aria-hidden="true"></div>
+  <div class="cut" aria-hidden="true"><span class="cut__kind"></span><span class="cut__name"></span><span class="cut__bar"><i></i></span></div>
 
   <main class="scenes">
 
     <!-- ===================== 01 — ANTES DE ENTRAR ===================== -->
-    <section class="etapa etapa--dark" data-etapa="01" data-title="Antes de entrar"><div class="etapa__stage"><span class="etapa__num">01</span><h2 class="etapa__title">Antes de entrar</h2></div></section>
+    <section class="etapa etapa--dark" data-etapa="01" data-title="Antes de entrar"><div class="etapa__stage"><span class="etapa__num">01</span><h2 class="etapa__title">Antes de entrar</h2><span class="etapa__down" aria-hidden="true"></span></div></section>
 
     <section class="scene aula scene--3d" data-scene="aula3d" data-etapa="01" data-name="Aula · El comienzo" style="--len:8">
       <div class="stage">
@@ -92,7 +93,7 @@
     </section>
 
     <!-- ===================== 03 — ALGO PARECE FALTAR ===================== -->
-    <section class="etapa etapa--light" data-etapa="03" data-title="Algo parece faltar"><div class="etapa__stage"><span class="etapa__num">03</span><h2 class="etapa__title">Algo parece faltar</h2></div></section>
+    <section class="etapa etapa--fall" data-etapa="03" data-title="Algo parece faltar"><div class="etapa__stage"><div class="fall" aria-hidden="true"></div><span class="etapa__num">03</span><h2 class="etapa__title">Algo parece faltar</h2></div></section>
 
     <section class="scene unreal scene--3d" data-scene="cubos" data-etapa="03" data-name="Unreal · Planta baja" style="--len:2.8">
       <div class="stage">
@@ -125,15 +126,9 @@
       </div>
     </section>
 
-    <section class="scene unreal" data-scene="corazon" data-etapa="03" data-name="Unreal · El corazón" style="--len:2.4">
-      <div class="stage" data-cursor="hacer">
-        <div class="hheart">
-          <span class="hheart__a"></span>
-          <span class="hheart__b"><canvas width="50" height="100"></canvas></span>
-          <span class="hheart__cine"><canvas width="100" height="100"></canvas></span>
-        </div>
-        <div class="shards" aria-hidden="true"></div>
-        <div class="meter" aria-hidden="true"><span>Tu ruido</span><i><b></b></i></div>
+    <section class="scene unreal scene--3d" data-scene="corazon" data-etapa="03" data-name="Unreal · El corazón" style="--len:3.6">
+      <div class="stage cine-bars">
+        <canvas class="world" aria-label="Cinemática en 3D: el semicírculo pierde su color, aparece Inquieta y se llena de ruido"></canvas>
         <div class="copy">
           <p>Mientras más quieras hacer, el ambiente y el corazón se vuelven hostiles.</p>
           <p>Pierde su color brillante y aparece inquieta, su otra mitad, en blanco y negro con ruido, formas bruscas, pitidos y movimiento de cámara.</p>
@@ -195,17 +190,9 @@
       </div>
     </section>
 
-    <section class="scene unreal" data-scene="cuadros" data-etapa="05" data-name="Unreal · El pasillo" style="--len:2.8">
+    <section class="scene unreal scene--3d" data-scene="cuadros" data-etapa="05" data-name="Unreal · El pasillo" style="--len:2.8">
       <div class="stage">
-        <div class="frames">
-          <figure class="frame"><div class="ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="300,690,400,384"></div></figure>
-          <figure class="frame"><div class="ph" data-src="assets/img/brand-b.webp" data-size="2000,1417" data-crop="150,280,520,820"></div></figure>
-          <figure class="frame"><div class="ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1210,672,210,330"></div></figure>
-          <figure class="frame"><div class="ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1417,731,289,343"></div></figure>
-          <figure class="frame"><div class="ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1716,819,191,189"></div></figure>
-          <figure class="frame"><div class="ph" data-src="assets/img/brand-a.webp" data-size="2000,1074" data-crop="1680,680,190,170"></div></figure>
-        </div>
-        <div class="frames__floor" aria-hidden="true"><i></i><i></i><i></i></div>
+        <canvas class="world" aria-label="Un pasillo en 3D con cuadros torcidos en la pared y marcos vacíos en el piso"></canvas>
         <div class="copy">
           <p>Después, un pasillo con cuadros colgados en la pared y, en el piso, solo el marco. Varios están torcidos.</p>
           <p>Si los acomodás, otros se tuercen o se caen. Si no hacés nada, al rato se acomodan solos.</p>
@@ -239,13 +226,9 @@
       </div>
     </section>
 
-    <section class="scene unreal" data-scene="dominos" data-etapa="06" data-name="Unreal · Los dominós" style="--len:3.2">
+    <section class="scene unreal scene--3d" data-scene="dominos" data-etapa="06" data-name="Unreal · Los dominós" style="--len:4">
       <div class="stage">
-        <div class="dominos">
-          <div class="dominos__row"></div>
-          <div class="dominos__phrase" aria-label="Te dije que no hagas nada"></div>
-          <p class="dominos__msg">Te dije que no hagas nada</p>
-        </div>
+        <canvas class="world" data-phrase="Te dije que no hagas nada" aria-label="Una cadena de dominós en 3D que cae y, vista desde arriba, forma la frase: Te dije que no hagas nada"></canvas>
         <div class="copy">
           <p>Adentro, una estructura hecha de dominós. La primera pieza está de cara al piso.</p>
           <p>Si no la tocás, se posiciona sola y genera la reacción en cadena, que al terminar revela una frase.</p>
@@ -271,7 +254,7 @@
     <!-- ===================== 08 — DESPUÉS ===================== -->
     <section class="etapa etapa--noise" data-etapa="08" data-title="Después"><div class="etapa__stage"><span class="etapa__num">08</span><h2 class="etapa__title">Después</h2></div></section>
 
-    <section class="scene aula aula--noise" data-scene="ruido" data-etapa="08" data-name="Aula · Ruido" style="--len:4">
+    <section class="scene aula aula--noise" data-scene="ruido" data-etapa="08" data-name="Aula · Ruido" style="--len:1.6">
       <div class="stage">
         <canvas class="static" width="200" height="120" aria-hidden="true"></canvas>
         <div class="after">
@@ -280,7 +263,7 @@
             <span class="after__tag">En el aula · el proyector</span>
             <div class="after__screen">
               <span class="after__pi"><i></i><i><canvas width="20" height="40"></canvas></i></span>
-              <blockquote class="after__quote">“Esta experiencia nace de ver que muchas veces cuando no hacemos nada sentimos la presión por hacer algo. Fijate, vos no hacías nada y la experiencia avanzaba igual pero siempre sentiste la necesidad de hacer algo.”</blockquote>
+              <blockquote class="after__quote">“Esta experiencia nace de ver que muchas veces cuando no hacemos nada sentimos la necesidad de hacer algo. Fijate, vos no hacías nada y la experiencia avanzaba igual pero siempre sentiste la necesidad de hacer algo.”</blockquote>
             </div>
           </div>
           <!-- Mientras habla, las escenas vuelven a mostrarse y se resuelven solas -->
@@ -292,7 +275,7 @@
           </div>
           <div class="after__side">
             <div class="after__cta">
-              <a href="index.html#recorrido" data-page class="pill" data-exit>Qué te llevás
+              <a href="index.html#llevas" data-page class="pill" data-exit>Qué te llevás
                 <svg class="arr" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 6h20M15 1l5 5-5 5"/></svg>
               </a>
               <a href="recorrido.html" data-page class="pill pill--paper">Volver a empezar</a>

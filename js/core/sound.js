@@ -7,6 +7,12 @@ let ctx = null;
 let master = null;
 let noiseBuf = null;
 let enabled = false;
+let voiceBus = null;
+// Volumen de la voz de PI (se puede bajar o mutear mientras habla)
+const VKEY = "pi-voice";
+const voiceState = (() => { try { const v = JSON.parse(sessionStorage.getItem(VKEY)); if (v && typeof v.vol === "number") return v; } catch (e) { /* ignore */ } return { vol: 0.8, muted: false }; })();
+const voiceListeners = new Set();
+function applyVoice() { if (voiceBus) voiceBus.gain.value = voiceState.muted ? 0 : voiceState.vol * 1.25; }
 const listeners = new Set();
 
 function store(v) { try { sessionStorage.setItem(KEY, v); } catch (e) { /* sin storage */ } }
@@ -21,6 +27,9 @@ function ensure() {
   master.gain.value = 0.8;
   const comp = ctx.createDynamicsCompressor();
   master.connect(comp).connect(ctx.destination);
+  voiceBus = ctx.createGain();
+  voiceBus.connect(master);
+  applyVoice();
   noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
   const d = noiseBuf.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -60,6 +69,19 @@ export const sound = {
   toggle() { return enabled ? this.disable() : this.enable(); },
   onChange(fn) { listeners.add(fn); },
 
+  // Voz de PI: volumen 0..1 y mute
+  get voiceVol() { return voiceState.vol; },
+  get voiceMuted() { return voiceState.muted || voiceState.vol < 0.01; },
+  setVoice({ vol, muted } = {}) {
+    if (typeof vol === "number") voiceState.vol = Math.max(0, Math.min(1, vol));
+    if (typeof muted === "boolean") voiceState.muted = muted;
+    if (voiceState.vol > 0.01 && vol !== undefined) voiceState.muted = false;
+    try { sessionStorage.setItem(VKEY, JSON.stringify(voiceState)); } catch (e) { /* ignore */ }
+    applyVoice();
+    voiceListeners.forEach((fn) => fn(voiceState));
+  },
+  onVoice(fn) { voiceListeners.add(fn); },
+
   // Latido: dos golpes graves (lub-dub)
   beat(intensity = 0.5) {
     if (!ok()) return;
@@ -87,6 +109,28 @@ export const sound = {
     env(g, t, 0.002, vol, 0.04);
     s.connect(f).connect(g).connect(master);
     s.start(t); s.stop(t + 0.06);
+  },
+
+  // Reloj de verdad: el mecanismo (clic seco) + la caja que resuena; tic y tac distintos
+  clock(vol = 0.4, tock = false) {
+    if (!ok()) return;
+    const t = ctx.currentTime;
+    // el golpe del escape: ruido muy corto y agudo
+    const s = noiseSrc();
+    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2500;
+    const g = ctx.createGain(); env(g, t, 0.0008, vol, 0.018);
+    s.connect(hp).connect(g).connect(master); s.start(t); s.stop(t + 0.04);
+    // la resonancia metálica (dos parciales) y el cuerpo de madera
+    [[tock ? 1850 : 2450, 0.5, 0.05], [tock ? 3900 : 5100, 0.25, 0.03], [tock ? 620 : 760, 0.6, 0.035]].forEach(([fq, k, d]) => {
+      const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = fq;
+      const og = ctx.createGain(); env(og, t, 0.001, vol * k, d);
+      o.connect(og).connect(master); o.start(t); o.stop(t + d + 0.03);
+    });
+    // un segundo golpecito apenas después (el ancla del reloj)
+    const s2 = noiseSrc();
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = tock ? 3000 : 3600; bp.Q.value = 4;
+    const g2 = ctx.createGain(); env(g2, t + 0.012, 0.0008, vol * 0.45, 0.012);
+    s2.connect(bp).connect(g2).connect(master); s2.start(t + 0.01); s2.stop(t + 0.04);
   },
 
   // Pitido
@@ -260,7 +304,7 @@ export const sound = {
     o.frequency.exponentialRampToValueAtTime(base * (0.8 + Math.random() * 0.15), t + 0.05);
     f.type = 'lowpass'; f.frequency.value = rough > 0.5 ? 900 : 2200;
     env(g, t, 0.003, vol, 0.045);
-    o.connect(f).connect(g).connect(master);
+    o.connect(f).connect(g).connect(voiceBus);
     o.start(t); o.stop(t + 0.07);
     // un poco de soplido de ruido encima
     const s = noiseSrc();
@@ -268,7 +312,7 @@ export const sound = {
     nf.type = 'bandpass'; nf.frequency.value = rough > 0.5 ? 700 : 2600; nf.Q.value = 2;
     const ng = ctx.createGain();
     env(ng, t, 0.002, vol * (0.25 + rough * 0.8), 0.04);
-    s.connect(nf).connect(ng).connect(master);
+    s.connect(nf).connect(ng).connect(voiceBus);
     s.start(t); s.stop(t + 0.06);
   },
 

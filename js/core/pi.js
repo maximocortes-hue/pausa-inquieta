@@ -23,6 +23,7 @@ function mount() {
       <span class="pi-bubble__next" aria-hidden="true"></span>
     </div>`;
   document.body.appendChild(stage);
+  stage.querySelector(".pi-bubble").appendChild(volumeControl());
   dim = stage.querySelector('.pi-dim');
   bubble = stage.querySelector('.pi-bubble');
   textEl = stage.querySelector('.pi-bubble__text');
@@ -31,6 +32,36 @@ function mount() {
   quipEl.className = 'pi-quip';
   quipEl.setAttribute('role', 'status');
   document.body.appendChild(quipEl);
+}
+
+// ---------- Volumen de la voz de PI: un slider y un ícono para mutear ----------
+const ICON_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" stroke="none"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>';
+export function volumeControl() {
+  const w = document.createElement("div");
+  w.className = "pi-vol";
+  w.innerHTML = `<button type="button" class="pi-vol__btn"></button><input class="pi-vol__range" type="range" min="0" max="100" step="1" aria-label="Volumen de PI">`;
+  const btn = w.querySelector("button");
+  const range = w.querySelector("input");
+  const sync = () => {
+    const m = sound.voiceMuted;
+    btn.innerHTML = m ? ICON_OFF : ICON_ON;
+    btn.setAttribute("aria-label", m ? "Activar la voz de PI" : "Silenciar la voz de PI");
+    btn.classList.toggle("is-off", m);
+    range.value = m ? 0 : Math.round(sound.voiceVol * 100);
+    range.style.setProperty("--v", `${range.value}%`);
+  };
+  // que tocar el control no pase de frase
+  ["pointerdown", "click"].forEach((ev) => w.addEventListener(ev, (e) => e.stopPropagation()));
+  btn.addEventListener("click", () => {
+    if (sound.voiceMuted) sound.setVoice({ muted: false, vol: sound.voiceVol < 0.05 ? 0.8 : sound.voiceVol });
+    else sound.setVoice({ muted: true });
+  });
+  range.addEventListener("input", () => { sound.setVoice({ vol: range.value / 100 }); if (+range.value === 0) sound.setVoice({ muted: true }); });
+  range.addEventListener("change", () => sound.voice(0));
+  sound.onVoice(sync);
+  sync();
+  return w;
 }
 
 // ---------- Escribir una frase (con ruido que se aclara) ----------
@@ -104,6 +135,7 @@ function waitAdvance(target = window) {
     const off = () => { target.removeEventListener('pointerdown', go); window.removeEventListener('keydown', key); };
     const go = (e) => { if (e && e.button > 0) return; off(); res(); };
     const key = (e) => {
+      if (e.target && e.target.closest && e.target.closest(".pi-vol")) return;
       if (['Enter', ' ', 'ArrowRight', 'ArrowDown', 'e', 'E'].includes(e.key)) { e.preventDefault(); off(); res(); }
     };
     // pequeña demora para no tomar el mismo clic que terminó de escribir

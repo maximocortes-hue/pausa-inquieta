@@ -26,6 +26,9 @@ const store = {
 let met = store.get('pi-met') === '1';
 const done = store.get('pi-recorrido-done') === '1';
 const fromRecorrido = location.hash === '#recorrido' || location.hash === '#iniciar';
+// "Qué te llevás" al terminar el paso a paso: directo a la caja, con todo abierto
+const toLlevas = location.hash === '#llevas';
+if (fromRecorrido || toLlevas) met = true; // si volvés del paso a paso, PI ya se presentó
 const root = document.documentElement;
 // Si ya hiciste el recorrido, lo de abajo está abierto (al volver, se abre con animación)
 if (done && !fromRecorrido) root.classList.add('unlocked');
@@ -177,7 +180,16 @@ function unlock() {
 
 gate().then(() => {
   lenis.start();
-  if (fromRecorrido) {
+  if (toLlevas && done) {
+    tv.in();
+    h.intro();
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      lenis.scrollTo('#llevas', { immediate: true, force: true, offset: 2 });
+      if (met) piInCorner();
+      setTimeout(() => ScrollTrigger.refresh(), 300);
+    });
+  } else if (fromRecorrido) {
     // venís del paso a paso: volvés al mismo lugar, con todo en color
     tv.in();
     h.intro();

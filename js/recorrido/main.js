@@ -5,7 +5,7 @@
 import { initScroll, initCursor, initNav, tv, bindPageLinks } from '../core/ui.js';
 import { heart, activity } from '../core/heart.js';
 import { sound, savedPref } from '../core/sound.js';
-import { pi } from '../core/pi.js';
+import { pi, volumeControl } from '../core/pi.js';
 import { photos, split, clamp, map, pick, WEIGHTS, reduced } from '../core/fx.js';
 import { SCENES as OLD } from './scenes.js';
 import { NEW_SCENES } from './scenes-new.js';
@@ -37,6 +37,7 @@ const ctx = { lenis, heart, activity, sound, tv, stats: () => ({ actions: activi
 const narrEl = document.querySelector('.narr');
 const kickEl = narrEl.querySelector('.narr__kicker');
 const textEl = narrEl.querySelector('.narr__text');
+narrEl.appendChild(volumeControl());
 const narr = {
   current: null,
   hide() { this.current = null; gsap.to(narrEl, { autoAlpha: 0, duration: 0.3 }); },
@@ -80,33 +81,50 @@ etapas.forEach((sec, i) => {
   const num = sec.querySelector('.etapa__num');
   const { chars } = split(title);
   const bases = chars.map((c, k) => (k % 3 === 1 ? 800 : k % 3 === 2 ? 200 : 400));
+  const first = i === 0; // la primera ya está a la vista apenas empezás
+  // Etapa 03: seguís cayendo desde el salón (líneas que suben)
+  const fallEl = sec.querySelector('.fall');
+  const streaks = [];
+  if (fallEl) {
+    const cols = ['#d7ff3a', '#a47cff', '#1f3cff', '#ecebe5'];
+    for (let k = 0; k < 34; k++) {
+      const s = document.createElement('i');
+      const h = 8 + Math.random() * 30;
+      s.style.cssText = `left:${Math.random() * 100}%;height:${h}vh;background:${cols[k % cols.length]};opacity:${0.25 + Math.random() * 0.6}`;
+      fallEl.appendChild(s);
+      streaks.push({ el: s, y: Math.random() * 140, v: 1.2 + Math.random() * 2.6 });
+    }
+  }
   let said = -1;
+  const render = (p) => {
+    const inn = first ? 1 : map(p, 0.02, 0.3);
+    const out = map(p, 0.75, 1);
+    chars.forEach((c, k) => {
+      const kk = clamp(inn * 1.4 - (k / chars.length) * 0.4);
+      // las letras buscan su peso hasta asentarse
+      c.style.fontWeight = kk < 1 && kk > 0 && Math.random() < 0.5 ? pick(WEIGHTS) : bases[k];
+      c.style.transform = `translateY(${(1 - kk) * 60 - out * 40}px)`;
+      c.style.opacity = (kk * (1 - out)).toFixed(3);
+    });
+    num.style.opacity = ((first ? 1 : map(p, 0, 0.2)) * (1 - out)).toFixed(3);
+    num.style.transform = `scale(${1 + p * 0.15}) translateY(${-out * 30}px)`;
+    if (fallEl) {
+      sec.style.setProperty('--fall', p.toFixed(3));
+      streaks.forEach((s) => { s.el.style.transform = `translateY(${110 + s.y - p * 260 * s.v}vh)`; });
+    }
+  };
   ScrollTrigger.create({
     trigger: sec, start: 'top top', end: 'bottom bottom',
     onToggle: (self) => {
       if (self.isActive) {
         setEtapa(i);
         narr.hide();
-        if (said !== i) { said = i; sound.whoosh(0.8, 0.06, true); sound.beat(0.5); }
+        if (said !== i) { said = i; sound.whoosh(0.8, 0.06, true); if (!fallEl) sound.beat(0.5); }
       }
     },
-    onUpdate: (self) => {
-      const p = self.progress;
-      const inn = map(p, 0.02, 0.4);
-      const out = map(p, 0.75, 1);
-      const P = hostile.P;
-      chars.forEach((c, k) => {
-        const kk = clamp(inn * 1.4 - (k / chars.length) * 0.4);
-        // las letras buscan su peso (thin → black) hasta asentarse
-        c.style.fontWeight = kk < 1 && kk > 0 && Math.random() < 0.5 ? pick(WEIGHTS) : bases[k];
-        const glitch = 0;
-        c.style.transform = `translate(${glitch}px, ${(1 - kk) * 60 - out * 40}px)`;
-        c.style.opacity = (kk * (1 - out)).toFixed(3);
-      });
-      num.style.opacity = (map(p, 0, 0.25) * (1 - out)).toFixed(3);
-      num.style.transform = `scale(${1 + p * 0.15}) translateY(${-out * 30}px)`;
-    },
+    onUpdate: (self) => render(self.progress),
   });
+  render(0);
 });
 
 // clic en el texto: lo completa (no hace falta esperar)
@@ -130,7 +148,7 @@ const inst = scenes.map((el) => {
   const copy = (p) => {
     let b = -1;
     beats.forEach((bt, i) => { if (p >= bt.at) b = i; });
-    if (b >= 0 && p < 0.985) narr.say(beats[b].kicker, beats[b].text);
+    if (b >= 0 && (p < 0.985 || el.dataset.scene === "ruido")) narr.say(beats[b].kicker, beats[b].text);
     voices.forEach((v) => {
       const on = p >= v.at && p < 0.92;
       if (on === v.on) return;
@@ -144,6 +162,32 @@ const inst = scenes.map((el) => {
   return { el, api, copy };
 });
 
+// ---------- Cambio de sala: un corte breve con el nombre del lugar
+const cutEl = document.querySelector(".cut");
+const cutKind = cutEl.querySelector(".cut__kind");
+const cutName = cutEl.querySelector(".cut__name");
+const cutBar = cutEl.querySelector(".cut__bar i");
+let cutTl = null;
+function cut(el) {
+  const [kind, name] = (el.dataset.name || "").split(" · ");
+  if (!name) return;
+  cutKind.textContent = kind;
+  cutName.textContent = name;
+  cutEl.classList.toggle("cut--aula", kind === "Aula");
+  if (cutTl) cutTl.kill();
+  sound.whoosh(0.5, 0.06, kind !== "Aula");
+  if (kind === "Aula") sound.click(0.12); else sound.static(0.18, 0.05);
+  cutTl = gsap.timeline()
+    .set(cutEl, { autoAlpha: 1, clipPath: "inset(0 0 100% 0)" })
+    .to(cutEl, { clipPath: "inset(0 0 0% 0)", duration: 0.28, ease: "power3.out" })
+    .fromTo([cutKind, cutName], { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, stagger: 0.05 }, 0.08)
+    .fromTo(cutBar, { scaleX: 0 }, { scaleX: 1, duration: 0.75, ease: "none" }, 0.1)
+    .to(cutEl, { clipPath: "inset(100% 0 0 0)", duration: 0.35, ease: "power3.in" }, 0.9)
+    .set(cutEl, { autoAlpha: 0 });
+}
+let lastWasScene = false, lastScene = -1;
+etapas.forEach((e) => ScrollTrigger.create({ trigger: e, start: "top top", end: "bottom bottom", onToggle: (self) => { if (self.isActive) lastWasScene = false; } }));
+
 let current = -1;
 inst.forEach((s, i) => {
   ScrollTrigger.create({
@@ -151,6 +195,8 @@ inst.forEach((s, i) => {
     onUpdate: (self) => { s.api.progress && s.api.progress(self.progress); if (current === i) s.copy(self.progress); },
     onToggle: (self) => {
       if (self.isActive) setEtapa(etapas.findIndex((e) => e.dataset.etapa === s.el.dataset.etapa));
+      if (self.isActive && lastWasScene && lastScene !== i) cut(s.el);
+      if (self.isActive) { lastWasScene = true; lastScene = i; }
       if (self.isActive) { current = i; s.copy(self.progress); s.api.enter && s.api.enter(); document.body.dataset.current = s.el.dataset.scene; }
       else { s.api.leave && s.api.leave(); if (current === i) current = -1; }
     },

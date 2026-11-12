@@ -40,7 +40,7 @@ export const hostile = {
       nextTick -= dt;
       if (state.on && P > 0.3 && nextTick <= 0) {
         nextTick = 1.1 - P * 0.75;
-        sound.tick(0.05 + P * 0.1, Math.random() < 0.5);
+        sound.clock(0.08 + P * 0.16, Math.random() < 0.5);
       }
       // Chirridos y gruñidos de PI, cada vez más seguido
       nextBad -= dt;

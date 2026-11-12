@@ -178,7 +178,7 @@
 /* =========================================================
    PROMESA — se arma si no hacés nada
    ========================================================= */
-.promesa { position: relative; height: 280vh; }
+.promesa { position: relative; height: 190vh; }
 .promesa__stick {
   position: sticky; top: 0; height: 100vh; height: 100svh;
   overflow: hidden;

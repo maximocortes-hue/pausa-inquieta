@@ -346,26 +346,26 @@ function ruido(stage, { sound, stats, heart }) {
   const markDone = () => { try { sessionStorage.setItem('pi-recorrido-done', '1'); } catch (e) { /* ignore */ } };
   stage.querySelectorAll('[data-exit]').forEach((a) => a.addEventListener('click', markDone));
   return {
-    enter: () => { active = true; hostile.enable(false); },
+    enter: () => { active = true; hostile.enable(false); chasers.clear(); },
     leave: () => { active = false; hostile.enable(true); },
     progress(p) {
-      sOp = map(p, 0, 0.16);
-      cv.style.opacity = sOp * (1 - map(p, 0.2, 0.36) * 0.75);
-      const a = map(p, 0.16, 0.28);
+      sOp = map(p, 0, 0.3);
+      cv.style.opacity = sOp * (1 - map(p, 0.35, 0.6) * 0.75);
+      const a = map(p, 0.3, 0.6);
       after.style.opacity = a;
       after.style.transform = `translateY(${(1 - a) * 30}px)`;
       once('static', p, 0.02, () => sound.static(1.6, 0.16));
-      if (p > 0.26 && !said) {
+      if (p > 0.55 && !said) {
         said = true;
         pi.write(quote, qText, { rough: () => 0.15, speed: 26 });
         reel.classList.add('is-on');
       }
-      if (p < 0.2) { said = false; quote.textContent = ''; reel.classList.remove('is-on'); }
-      if (p > 0.6 && !counted) {
+      if (p < 0.4) { said = false; quote.textContent = ''; reel.classList.remove('is-on'); }
+      if (p > 0.55 && !counted) {
         counted = true;
         markDone();
       }
-      if (p < 0.5) counted = false;
+      if (p < 0.4) counted = false;
     },
     tick() {
       if (!active) return;
@@ -385,7 +385,7 @@ const W3D = () => import('../three/worlds.js');
 
 function cubos3d(stage, { sound, heart }) {
   const canvas = stage.querySelector('.world');
-  const w = lazy3d(canvas, () => W3D().then((m) => m.createCubos(canvas, { onPlace: () => { sound.thud(0.3); } })));
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createCubos(canvas, { onPlace: () => { sound.thud(0.3); }, onLand: () => { sound.thud(0.7); heart && heart.body && gsap.fromTo(heart.body, { y: 10 }, { y: 0, duration: 0.5, ease: "elastic.out(1,.3)" }); } })));
   let active = false, tt = 0, side = 0, placed = false;
   return {
     enter: () => { active = true; },
@@ -395,7 +395,7 @@ function cubos3d(stage, { sound, heart }) {
     tick(dt) {
       if (!active) return;
       tt += dt;
-      if (tt > 1) { tt = 0; side = 1 - side; sound.tick(placed ? 0.2 : 0.08, !!side); }
+      if (tt > 1) { tt = 0; side = 1 - side; sound.clock(placed ? 0.55 : 0.32, !!side); }
     },
   };
 }
@@ -420,11 +420,118 @@ function hoods3d(stage, { sound }) {
   };
 }
 
+// ---------- Las palabras que salen de la pared se quedan en tu pantalla:
+// te siguen (al mouse, o dan vueltas si no hay mouse) y molestan.
+const chasers = (() => {
+  const layer = document.querySelector('.floaters');
+  const list = [];
+  const ptr = { x: innerWidth / 2, y: innerHeight / 2, t: 0 };
+  window.addEventListener('pointermove', (e) => { ptr.x = e.clientX; ptr.y = e.clientY; ptr.t = performance.now(); }, { passive: true });
+  let time = 0;
+  gsap.ticker.add((tt, dms) => {
+    if (!list.length) return;
+    const dt = Math.min(0.05, dms / 1000);
+    time += dt;
+    const live = performance.now() - ptr.t < 2500;
+    list.forEach((c, i) => {
+      // sin mouse: rondan por la pantalla
+      const tx = live ? ptr.x + Math.cos(time * c.w + c.ph) * c.r : innerWidth * (0.5 + 0.38 * Math.sin(time * c.w * 0.6 + c.ph));
+      const ty = live ? ptr.y + Math.sin(time * c.w * 1.3 + c.ph) * c.r * 0.7 : innerHeight * (0.45 + 0.3 * Math.cos(time * c.w * 0.5 + c.ph * 2));
+      c.x += (tx - c.x) * c.k;
+      c.y += (ty - c.y) * c.k;
+      c.el.style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) rotate(${Math.sin(time * 1.7 + i) * 8 + c.rot}deg)`;
+      if (Math.random() < 0.02) c.el.style.fontWeight = pick(WEIGHTS);
+    });
+  });
+  return {
+    add(word, from) {
+      const el = document.createElement('span');
+      el.className = 'chaser';
+      el.textContent = word;
+      el.style.fontSize = `${Math.round(rand(22, innerWidth < 760 ? 40 : 64))}px`;
+      layer.appendChild(el);
+      const c = { el, x: from ? from.x : innerWidth / 2, y: from ? from.y : innerHeight * 0.3, k: rand(0.025, 0.07), r: rand(40, 190), w: rand(0.6, 1.6), ph: rand(0, 6.28), rot: rand(-12, 12) };
+      list.push(c);
+      gsap.fromTo(el, { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(2)' });
+      if (list.length > 12) { const old = list.shift(); gsap.to(old.el, { opacity: 0, duration: 0.4, onComplete: () => old.el.remove() }); }
+    },
+    clear() {
+      list.splice(0).forEach((c) => gsap.to(c.el, { opacity: 0, scale: 0.6, duration: 0.5, onComplete: () => c.el.remove() }));
+    },
+  };
+})();
+
 function letras3d(stage, { sound }) {
   const canvas = stage.querySelector('.world');
   const words = canvas.dataset.words.split('|');
-  const w = lazy3d(canvas, () => W3D().then((m) => m.createLetras(canvas, { words, onKey: () => sound.click(0.08) })));
+  let active = false;
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createLetras(canvas, {
+    words,
+    onKey: () => sound.click(0.08),
+    onWord: (word) => {
+      if (!active) return;
+      sound.whoosh(0.5, 0.06, true);
+      const r = canvas.getBoundingClientRect();
+      chasers.add(word, { x: r.left + r.width / 2, y: r.top + r.height * 0.3 });
+    },
+  })));
+  return {
+    enter: () => { active = true; },
+    leave: () => { active = false; },
+    progress(p) { w.set(p); if (p <= 0.001) chasers.clear(); },
+  };
+}
+
+// =========================================================
+// 03 · EL CORAZÓN — una cinemática en 3D (como en Unreal): planos con cortes,
+// la cámara se mueve; el semicírculo pierde su color, aparece Inquieta en
+// blanco y negro con ruido, formas bruscas, pitidos, y se llena de ruido.
+// =========================================================
+function corazon3d(stage, { sound, heart }) {
+  const canvas = stage.querySelector('.world');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createCorazon(canvas, {
+    onCut: (k) => { sound.static(0.12, 0.05 + k * 0.02); sound.beep(1400 + k * 200, 0.06, 0.03, 'square'); },
+  })));
+  const once = crossing();
+  return {
+    enter: () => { heart.audible = 'always'; },
+    leave: () => { heart.audible = 'auto'; },
+    progress(p) {
+      w.set(p);
+      once('inq', p, 0.3, () => { sound.glitch(0.08); });
+      once('shards', p, 0.5, () => { sound.beep(220, 0.3, 0.05, 'sawtooth'); sound.beep(2200, 0.08, 0.04, 'square'); });
+      once('fill', p, 0.7, () => sound.static(1.4, 0.12));
+    },
+  };
+}
+
+// 05 · EL PASILLO — cuadros torcidos; no se resuelve: solo se ve
+function cuadros3d(stage, { sound }) {
+  const canvas = stage.querySelector('.world');
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createCuadros(canvas, {
+    onTilt: () => sound.click(0.08),
+    onFall: () => sound.thud(0.3),
+  })));
   return { progress(p) { w.set(p); } };
+}
+
+// 06 · LOS DOMINÓS — la cámara acompaña la cadena y al final la ves desde arriba
+function dominos3d(stage, { sound }) {
+  const canvas = stage.querySelector('.world');
+  const phrase = canvas.dataset.phrase;
+  let lastClick = 0;
+  const w = lazy3d(canvas, () => W3D().then((m) => m.createDominos(canvas, {
+    phrase,
+    onFall: () => { const n = performance.now(); if (n - lastClick > 45) { lastClick = n; sound.click(0.05 + Math.random() * 0.04); } },
+  })));
+  const once = crossing();
+  return {
+    progress(p) {
+      w.set(p);
+      once('first', p, 0.1, () => sound.thud(0.2));
+      once('top', p, 0.86, () => sound.chime(392, 0.05));
+    },
+  };
 }
 
 // La escalera: subir cuesta (si seguís bajando con el scroll, te devuelve un poco)
@@ -480,7 +587,8 @@ function final3d(stage, { sound }) {
 }
 
 export const NEW_SCENES = {
-  aula3d, salon3d, pcs, dominos, ruido,
+  aula3d, salon3d, pcs, ruido,
+  corazon: corazon3d, cuadros: cuadros3d, dominos: dominos3d,
   cubos: cubos3d, luces: luces3d, hoods1: hoods3d, hoods2: hoods3d,
   letras: letras3d, escalera: escalera3d, final: final3d,
 };

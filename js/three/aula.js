@@ -398,7 +398,9 @@ export async function createAula(canvas) {
     box.group.scale.setScalar(BS * Math.max(0.0001, bx));
     cloth.scale.setScalar(Math.max(0.0001, outBack(seg(p, 0.48, 0.53))));
     const o = ease(seg(p, 0.58, 0.64));
-    box.lid.rotation.x = -o * 1.95;
+    // al acercarnos al monitor la tapa se baja, para que no tape la pantalla
+    const shut = ease(seg(p, 0.76, 0.82));
+    box.lid.rotation.x = -o * 1.95 * (1 - shut);
     const r = outCubic(seg(p, 0.62, 0.68));
     const s = ease(seg(p, 0.66, 0.72));
     card.visible = o > 0.3 && p < 0.78;

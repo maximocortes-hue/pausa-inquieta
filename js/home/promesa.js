@@ -53,8 +53,8 @@ export default function promesa(lenis) {
         if (vel < -0.6) { locked = false; a -= dt * 0.9; }
       } else {
         if (v > 0.6) a -= dt * 0.9;
-        else if (activity.idle > 0.8) a += dt * 0.5;
-        else a += dt * 0.1;
+        else if (activity.idle > 0.5) a += dt * 0.7;
+        else a += dt * 0.18;
       }
       a = Math.max(0, Math.min(1, a));
       if (a >= 0.999 && !done) { done = true; locked = true; sound.settle(0.09); }
@@ -68,7 +68,10 @@ export default function promesa(lenis) {
         ? `translate3d(${s.x * k}vw, ${s.y * k}vh, 0) rotate(${s.r * k}deg)`
         : '';
       chars[i].style.opacity = (0.18 + 0.82 * e).toFixed(3);
-      if (a < 0.98) { if (Math.random() < (1 - a) * 0.25) chars[i].style.fontWeight = pick(WEIGHTS); }
+      if (a < 0.98) {
+        // cambios de peso suaves: pocos, y cerca del peso final (300)
+        if (Math.random() < (1 - a) * 0.035) chars[i].style.fontWeight = pick([200, 300, 400, 500]);
+      }
       else chars[i].style.fontWeight = 300;
     }
     halo.style.opacity = e.toFixed(3);
