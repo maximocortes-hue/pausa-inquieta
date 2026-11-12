@@ -99,7 +99,7 @@ function pcs(stage, { sound, tv }) {
       });
       const farOn = p >= 0.56 && p < 0.8;
       far.classList.toggle('is-on', farOn);
-      if (farOn && !asked) { asked = true; sound.chime(587, 0.05); pi.write(q, '¿Faltaba algo?', { speed: 70 }); }
+      if (farOn && !asked) { asked = true; sound.chime(587, 0.05); pi.write(q, '¿Faltaba algo más?', { speed: 70 }); }
       if (p < 0.5) { asked = false; q.textContent = ''; }
       once('cut', p, 0.8, () => tv.burst(0.5));
       const back = p >= 0.8;

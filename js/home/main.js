@@ -24,6 +24,8 @@ const store = {
   set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* sin storage */ } },
 };
 let met = store.get('pi-met') === '1';
+// Salir del paso a paso (o terminarlo) te deja en "Qué te llevás", con todo abierto
+if (location.hash === '#llevas') store.set('pi-recorrido-done', '1');
 const done = store.get('pi-recorrido-done') === '1';
 const fromRecorrido = location.hash === '#recorrido' || location.hash === '#iniciar';
 // "Qué te llevás" al terminar el paso a paso: directo a la caja, con todo abierto
